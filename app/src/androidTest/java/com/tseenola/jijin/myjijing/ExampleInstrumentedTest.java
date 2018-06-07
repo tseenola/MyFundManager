@@ -1,22 +1,15 @@
 package com.tseenola.jijin.myjijing;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import com.lidroid.xutils.HttpUtils;
-import com.lidroid.xutils.exception.HttpException;
-import com.lidroid.xutils.http.ResponseInfo;
-import com.lidroid.xutils.http.callback.RequestCallBack;
-import com.lidroid.xutils.http.client.HttpRequest;
-import com.tseenola.jijin.myjijing.utils.Constant;
+import com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.litepal.crud.DataSupport;
 
-import static android.R.attr.data;
-import static org.junit.Assert.*;
+import java.util.List;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -28,7 +21,8 @@ public class ExampleInstrumentedTest {
     @Test
     public void useAppContext() throws Exception {
 
-
+        List<FundListInfo> newsList = DataSupport.select("FundCode").find(FundListInfo.class);
+        Log.d("vbvb", "loadDatas: ");
 
     }
 }

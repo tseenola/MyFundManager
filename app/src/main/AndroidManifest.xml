@@ -34,6 +34,9 @@
 
         <activity android:name=".TestActivity"
             android:label="测试"/>
+
+        <activity android:name=".biz.fundstrategy.view.FundStrategyAty"
+            android:label="基金策略"/>
     </application>
 
 </manifest>

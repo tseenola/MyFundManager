@@ -62,43 +62,28 @@ public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterVie
 
     @Override
     public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
-        if (mDialog==null) {
-            return;
-        }
-        ThreadUtil.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("vbvb", "BaseAty onLoadDatasSucc currentThread: "+Thread.currentThread().getId());
-                mDialog.dismiss();
-            }
-        });
+        onCancelled(null);
         Toast.makeText(this, "加载成功：", Toast.LENGTH_SHORT).show();
 
     }
 
     @Override
     public void onLoadDataFail(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
-        if (mDialog==null) {
-            return;
-        }
-        ThreadUtil.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("vbvb", "BaseAty onLoadDataFail currentThread: "+Thread.currentThread().getId());
-                mDialog.dismiss();
-            }
-        });
+        onCancelled(null);
         Toast.makeText(this, "加载失败："+(String)pO, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onLoading(Object pO, long total, long current, boolean isUploading) {
-        if (mDialog==null) {
-            return;
-        }
         ThreadUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (mDialog==null) {
+                    mDialog = new MaterialDialog.Builder(BaseAty.this)
+                            .content("加载中")
+                            .progress(true, 0)
+                            .show();
+                }
                 Log.d("vbvb", "BaseAty onLoading currentThread: "+Thread.currentThread().getId());
                 mDialog.setContent("正在加载");
             }
