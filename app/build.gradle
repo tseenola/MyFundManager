@@ -1,0 +1,36 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
+    defaultConfig {
+        applicationId "com.tseenola.jijin.myjijing"
+        minSdkVersion 22
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    useLibrary 'org.apache.http.legacy'
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:4.12'
+    compile files('libs/butterknife-7.0.1.jar')
+    compile files('libs/xUtils-2.6.14.jar')
+    compile 'com.github.lecho:hellocharts-android:v1.5.8'
+    compile 'com.android.support:support-v4:26.0.0-alpha1'
+    compile 'org.litepal.android:core:1.6.1'
+    debugCompile 'com.amitshekhar.android:debug-db:1.0.0'
+    compile 'com.afollestad.material-dialogs:commons:0.9.6.0'
+}

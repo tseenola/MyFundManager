@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="JIJING" />
+    <version value="2" />
+    <list>
+        <mapping class="com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo" />
+        <mapping class="com.tseenola.jijin.myjijing.biz.fundhistory.model.FundInfo"/>
+    </list>
+
+</litepal>
