@@ -4,20 +4,15 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/bt_UpdatePureData"
-        android:text="更新所有基金列表的净值数据"
+    <ListView
+        android:id="@+id/lv_FundList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"></ListView>
 
-    <EditText
-        android:hint="30"
-        android:id="@+id/et_DayRange"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
     <Button
-        android:id="@+id/bt_GetBestFundList"
-        android:text="找出跌到最低点的基金列表"
+        android:id="@+id/bt_GetStrategy"
+        android:text="抓取"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>

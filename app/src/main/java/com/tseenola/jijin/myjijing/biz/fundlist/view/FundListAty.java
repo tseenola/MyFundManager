@@ -1,10 +1,11 @@
 package com.tseenola.jijin.myjijing.biz.fundlist.view;
 
+import android.content.ContentValues;
 import android.content.Intent;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,11 +25,14 @@ import com.tseenola.jijin.myjijing.utils.Constant;
 import org.litepal.crud.DataSupport;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.R.attr.key;
 
 
 public class FundListAty extends BaseAty implements IFundListAty {
@@ -61,7 +65,7 @@ public class FundListAty extends BaseAty implements IFundListAty {
     }
 
     @Override
-    public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
+    public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList final String pDataSource) {
         mFundInfos = (List<FundListInfo>) pO;
         mFundListAdapter = new FundListAdapter(this, mFundInfos, R.layout.item_fundlist);
         mLvFund.setAdapter(mFundListAdapter);
@@ -73,6 +77,7 @@ public class FundListAty extends BaseAty implements IFundListAty {
                 startActivity(lIntent);
             }
         });
+
         if (pDataSource.equals(Constant.DATA_SOURCE.FROM_NET)) {
             mMainPresenter.saveFundList(mFundInfos);
         }
@@ -104,5 +109,16 @@ public class FundListAty extends BaseAty implements IFundListAty {
         mFundInfos.clear();
         mFundInfos.addAll(lFundListInfos);
         mFundListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onDestroy() {
+        /*Map<Integer,Boolean> lBooleanMap = mFundListAdapter.getCbSelectedMap();
+        Set<Integer> lIntegers = lBooleanMap.keySet();
+
+        for (int i = 0;i<lIntegers.size();i++){
+            DataSupport.where()
+        }*/
+        super.onDestroy();
     }
 }

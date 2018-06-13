@@ -18,7 +18,7 @@ import com.tseenola.jijin.myjijing.utils.ThreadUtil;
  */
 
 public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterView.OnItemClickListener{
-    private MaterialDialog mDialog;
+    protected MaterialDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,20 +61,41 @@ public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterVie
     }
 
     @Override
-    public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
-        onCancelled(null);
-        Toast.makeText(this, "加载成功：", Toast.LENGTH_SHORT).show();
-
+    public void onLoadDatasSucc(final Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
+        ThreadUtil.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mDialog==null) {
+                    mDialog = new MaterialDialog.Builder(BaseAty.this)
+                            .content("加载中")
+                            .progress(true, 0)
+                            .show();
+                }
+                Log.d("vbvb", "BaseAty onLoadDatasSucc currentThread: "+Thread.currentThread().getId());
+                mDialog.setContent((String)pO);
+            }
+        });
     }
 
     @Override
-    public void onLoadDataFail(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
-        onCancelled(null);
-        Toast.makeText(this, "加载失败："+(String)pO, Toast.LENGTH_SHORT).show();
+    public void onLoadDataFail(final Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
+        ThreadUtil.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mDialog==null) {
+                    mDialog = new MaterialDialog.Builder(BaseAty.this)
+                            .content("加载中")
+                            .progress(true, 0)
+                            .show();
+                }
+                Log.d("vbvb", "BaseAty onLoadDataFail currentThread: "+Thread.currentThread().getId());
+                mDialog.setContent((String)pO);
+            }
+        });
     }
 
     @Override
-    public void onLoading(Object pO, long total, long current, boolean isUploading) {
+    public void onLoading(final Object pO, long total, long current, boolean isUploading) {
         ThreadUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -85,7 +106,7 @@ public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterVie
                             .show();
                 }
                 Log.d("vbvb", "BaseAty onLoading currentThread: "+Thread.currentThread().getId());
-                mDialog.setContent("正在加载");
+                mDialog.setContent((String)pO);
             }
         });
 

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 import static org.litepal.crud.DataSupport.findAll;
 
 /**
@@ -38,17 +39,17 @@ public class FundListPrt implements IFundListPrt {
         /**
          * 加载数据
          * 基金列表1周更新一次，周期可以通过配置文件配置
-         *
+         * 基金只显示非自选的基金
          */
         if (DataSupport.count(FundListInfo.class)==0){
             downLoadFundlist();
         }else {
             //先来个5天更新一次吧
-            if (Calendar.getInstance().get(Calendar.DATE)%5==0){
+            if (Calendar.getInstance().get(Calendar.DATE)%30==0){
                 downLoadFundlist();
             }else {
                 Log.d("vbvb", "从数据库更新: ");
-                DataSupport.findAllAsync(FundListInfo.class).listen(new FindMultiCallback() {
+                DataSupport.where("selected = ?","0").findAsync(FundListInfo.class).listen(new FindMultiCallback() {
                     @Override
                     public <T> void onFinish(List<T> t) {
                         List<FundListInfo> lFundListInfos = (List<FundListInfo>) t;

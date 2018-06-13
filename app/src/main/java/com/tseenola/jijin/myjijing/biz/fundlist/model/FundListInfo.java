@@ -1,5 +1,6 @@
 package com.tseenola.jijin.myjijing.biz.fundlist.model;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
 
 /**
@@ -13,6 +14,8 @@ public class FundListInfo extends DataSupport{
     private String FundName;
     private String FundType;
     private String FundPingYing;
+    @Column(defaultValue = "0")
+    private boolean selected;
 
     public String getFundCode() {
         return FundCode;
@@ -54,4 +57,11 @@ public class FundListInfo extends DataSupport{
         FundPingYing = pFundPingYing;
     }
 
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean pSelected) {
+        selected = pSelected;
+    }
 }

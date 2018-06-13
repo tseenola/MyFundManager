@@ -1,14 +1,24 @@
 package com.tseenola.jijin.myjijing.biz.fundstrategy.view;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.tseenola.jijin.myjijing.R;
+import com.tseenola.jijin.myjijing.adapter.FundStrategyAdapter;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
+import com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.presenter.FundStrategyPrt;
+import com.tseenola.jijin.myjijing.biz.fundstrategy.presenter.IFundStrategyPrt;
 import com.tseenola.jijin.myjijing.utils.Constant;
+
+import org.litepal.crud.DataSupport;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -20,13 +30,15 @@ import butterknife.OnClick;
  */
 
 public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
-    @Bind(R.id.bt_UpdatePureData)
-    Button mBtUpdatePureData;
-    @Bind(R.id.et_DayRange)
-    EditText mEtDayRange;
-    @Bind(R.id.bt_GetBestFundList)
-    Button mBtGetBestFundList;
-    private FundStrategyPrt mFundStrategyPrt;
+    @Bind(R.id.lv_FundList)
+    ListView mLvFundList;
+    @Bind(R.id.bt_GetStrategy)
+    Button mBtGetStrategy;
+    private IFundStrategyPrt mFundStrategyPrt;
+    private FundStrategyAdapter mFundStrategyAdapter;
+    private List<FundListInfo> mFundListInfos;
+    private int mCurIndex;
+    private List<FundListInfo> mStrategyList;
 
     @Override
     public void bindPresenter() {
@@ -41,21 +53,48 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
 
     @Override
     public void initData() {
-
+        mFundListInfos = DataSupport.where("selected = 1").find(FundListInfo.class);
+        mFundStrategyAdapter = new FundStrategyAdapter(this, mFundListInfos, R.layout.item_fundlist);
+        mLvFundList.setAdapter(mFundStrategyAdapter);
     }
 
-    @OnClick({R.id.bt_UpdatePureData, R.id.bt_GetBestFundList})
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.bt_UpdatePureData:
-                //1.找到基金列表。
-                //2.获取每个基金的histrory,并且保存
-                mFundStrategyPrt.loadDatas("", Constant.TaskName.DOWN_All_FUNDS_HISTORY);
-                break;
-            case R.id.bt_GetBestFundList:
-                break;
-            default:
-                break;
+    @OnClick(R.id.bt_GetStrategy)
+    public void onClick() {
+        Map<Integer,Boolean> lBooleanMap =  mFundStrategyAdapter.getCbSelectedMap();
+        Set<Integer> lIntegers = lBooleanMap.keySet();
+        mStrategyList = new ArrayList<>();
+        for (Integer teger :
+                lIntegers) {
+            mStrategyList.add(mFundListInfos.get(teger));
+        }
+
+        if (mStrategyList.size()>0){
+            mCurIndex = 0;
+            mFundStrategyPrt.loadDatas(mStrategyList.get(mCurIndex), Constant.TaskName.DOWN_FUND_HISTORY);
+        }else {
+            Toast.makeText(this, "请选择要更新的基金", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onLoadDataFail(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
+        super.onLoadDataFail(pO, pDataSource);
+        mCurIndex++;
+        if (mCurIndex<mStrategyList.size()){
+            mFundStrategyPrt.loadDatas(mStrategyList.get(mCurIndex), Constant.TaskName.DOWN_FUND_HISTORY);
+        }else {
+            onCancelled(null);
+        }
+    }
+
+    @Override
+    public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
+        super.onLoadDatasSucc(pO, pDataSource);
+        mCurIndex++;
+        if (mCurIndex<mStrategyList.size()){
+            mFundStrategyPrt.loadDatas(mStrategyList.get(mCurIndex), Constant.TaskName.DOWN_FUND_HISTORY);
+        }else {
+            onCancelled(null);
         }
     }
 }

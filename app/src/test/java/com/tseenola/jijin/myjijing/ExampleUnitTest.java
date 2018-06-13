@@ -159,4 +159,15 @@ public class ExampleUnitTest {
         String ss[] = data.split(";");
         System.out.print("");
     }
+
+    @Test
+    public void test2(){
+        int i = 0;
+        i++;
+        System.out.print("vbvb i:"+i);
+
+        int z = 0;
+        ++z;
+        System.out.print("vbvb z:"+z);
+    }
 }
