@@ -62,7 +62,8 @@ public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterVie
 
     @Override
     public void onLoadDatasSucc(final Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
-        ThreadUtil.runOnUiThread(new Runnable() {
+        onCancelled(null);
+        /*ThreadUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (mDialog==null) {
@@ -74,12 +75,13 @@ public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterVie
                 Log.d("vbvb", "BaseAty onLoadDatasSucc currentThread: "+Thread.currentThread().getId());
                 mDialog.setContent((String)pO);
             }
-        });
+        });*/
     }
 
     @Override
     public void onLoadDataFail(final Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
-        ThreadUtil.runOnUiThread(new Runnable() {
+        onCancelled(null);
+        /*ThreadUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (mDialog==null) {
@@ -91,7 +93,7 @@ public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterVie
                 Log.d("vbvb", "BaseAty onLoadDataFail currentThread: "+Thread.currentThread().getId());
                 mDialog.setContent((String)pO);
             }
-        });
+        });*/
     }
 
     @Override

@@ -66,7 +66,15 @@ public class FundListAty extends BaseAty implements IFundListAty {
 
     @Override
     public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList final String pDataSource) {
-        mFundInfos = (List<FundListInfo>) pO;
+        FundListInfo lFundListInfo = new FundListInfo();
+        lFundListInfo.setFundCode("999999");
+        lFundListInfo.setFundAbbr("xxxx3");
+        lFundListInfo.setFundName("ab3");
+        lFundListInfo.setFundPingYing("pingying3");
+        lFundListInfo.setFundType("c3");
+        lFundListInfo.setTest2(false);
+        lFundListInfo.save();
+        /*mFundInfos = (List<FundListInfo>) pO;
         mFundListAdapter = new FundListAdapter(this, mFundInfos, R.layout.item_fundlist);
         mLvFund.setAdapter(mFundListAdapter);
         mLvFund.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -81,7 +89,7 @@ public class FundListAty extends BaseAty implements IFundListAty {
         if (pDataSource.equals(Constant.DATA_SOURCE.FROM_NET)) {
             mMainPresenter.saveFundList(mFundInfos);
         }
-        Log.d("vbvb", "onLoadDatasSucc currentThread: " + Thread.currentThread().getId());
+        Log.d("vbvb", "onLoadDatasSucc currentThread: " + Thread.currentThread().getId());*/
         super.onLoadDatasSucc(pO, pDataSource);
     }
 

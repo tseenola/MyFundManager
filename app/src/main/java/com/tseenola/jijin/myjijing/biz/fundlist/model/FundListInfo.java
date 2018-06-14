@@ -17,6 +17,14 @@ public class FundListInfo extends DataSupport{
     @Column(defaultValue = "0")
     private boolean selected;
 
+    @Column(defaultValue = "1")
+    private boolean test1;
+
+    @Column(defaultValue = "1")
+    private boolean test2;
+
+    @Column(defaultValue = "1")
+    private String test3;
     public String getFundCode() {
         return FundCode;
     }
@@ -63,5 +71,29 @@ public class FundListInfo extends DataSupport{
 
     public void setSelected(boolean pSelected) {
         selected = pSelected;
+    }
+
+    public boolean isTest1() {
+        return test1;
+    }
+
+    public void setTest1(boolean pTest1) {
+        test1 = pTest1;
+    }
+
+    public boolean isTest2() {
+        return test2;
+    }
+
+    public void setTest2(boolean pTest2) {
+        test2 = pTest2;
+    }
+
+    public String getTest3() {
+        return test3;
+    }
+
+    public void setTest3(String pTest3) {
+        test3 = pTest3;
     }
 }

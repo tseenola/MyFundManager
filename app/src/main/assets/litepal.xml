@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="JIJING" />
-    <version value="4" />
+    <version value="7" />
     <list>
         <mapping class="com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo" />
         <mapping class="com.tseenola.jijin.myjijing.biz.fundhistory.model.FundInfo"/>
