@@ -49,7 +49,7 @@ public class FundListPrt implements IFundListPrt {
                 downLoadFundlist();
             }else {
                 Log.d("vbvb", "从数据库更新: ");
-                DataSupport.where("selected = ?","0").findAsync(FundListInfo.class).listen(new FindMultiCallback() {
+                DataSupport.where("selected = ? and FundType != ?","0","货币型").findAsync(FundListInfo.class).listen(new FindMultiCallback() {
                     @Override
                     public <T> void onFinish(List<T> t) {
                         List<FundListInfo> lFundListInfos = (List<FundListInfo>) t;

@@ -2,57 +2,69 @@ package com.tseenola.jijin.myjijing.biz.fundhistory.model;
 
 import org.litepal.crud.DataSupport;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * Created by lenovo on 2018/6/1.
  * 描述：
  */
 
-public class FundInfo extends DataSupport{
-    private String fS_name;
-    private String fS_code;
-    private String fund_Rate;
-    private String Data_netWorthTrend;
-    private String fund_minsg;
+public class FundInfo extends DataSupport implements Serializable {
 
-    public String getfS_name() {
-        return fS_name;
+    private static final long serialVersionUID = 1L;
+
+    private String fSName;
+    private String fSCode;
+    private String fundRate;
+    private String DataNetWorthTrend;
+    private String fundMinsg;
+    private String DataGrandTotal;
+
+    public String getfSName() {
+        return fSName;
     }
 
-    public void setfS_name(String pFS_name) {
-        fS_name = pFS_name;
+    public void setfSName(String pFSName) {
+        fSName = pFSName;
     }
 
-    public String getfS_code() {
-        return fS_code;
+    public String getfSCode() {
+        return fSCode;
     }
 
-    public void setfS_code(String pFS_code) {
-        fS_code = pFS_code;
+    public void setfSCode(String pFSCode) {
+        fSCode = pFSCode;
     }
 
-    public String getFund_Rate() {
-        return fund_Rate;
+    public String getFundRate() {
+        return fundRate;
     }
 
-    public void setFund_Rate(String pFund_Rate) {
-        fund_Rate = pFund_Rate;
+    public void setFundRate(String pFundRate) {
+        fundRate = pFundRate;
     }
 
-    public String getData_netWorthTrend() {
-        return Data_netWorthTrend;
+    public String getDataNetWorthTrend() {
+        return DataNetWorthTrend;
     }
 
-    public void setData_netWorthTrend(String pData_netWorthTrend) {
-        Data_netWorthTrend = pData_netWorthTrend;
+    public void setDataNetWorthTrend(String pDataNetWorthTrend) {
+        DataNetWorthTrend = pDataNetWorthTrend;
     }
 
-    public String getFund_minsg() {
-        return fund_minsg;
+    public String getFundMinsg() {
+        return fundMinsg;
     }
 
-    public void setFund_minsg(String pFund_minsg) {
-        fund_minsg = pFund_minsg;
+    public void setFundMinsg(String pFundMinsg) {
+        fundMinsg = pFundMinsg;
+    }
+
+    public String getDataGrandTotal() {
+        return DataGrandTotal;
+    }
+
+    public void setDataGrandTotal(String pDataGrandTotal) {
+        DataGrandTotal = pDataGrandTotal;
     }
 }

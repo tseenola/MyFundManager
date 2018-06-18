@@ -6,13 +6,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.gson.Gson;
 import com.tseenola.jijin.myjijing.R;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
 import com.tseenola.jijin.myjijing.biz.fundhistory.model.FundInfo;
 import com.tseenola.jijin.myjijing.biz.fundhistory.presenter.FundHistoryPrt;
+import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
 import com.tseenola.jijin.myjijing.utils.Constant;
 import com.tseenola.jijin.myjijing.utils.DateUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +53,14 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
     public void initData() {
         mPointValues = new ArrayList<PointValue>();
         mAxisXValues = new ArrayList<AxisValue>();
+        Serializable lFundListInfo  = getIntent().getSerializableExtra("FundInfo");
+        if (lFundListInfo!=null){
+            mFundInfo = (FundInfo) lFundListInfo;
+            Log.d("vbvb", "onLoadDatasSucc: ");
+            getAxisXLables();//获取x轴的标注
+            getAxisPoints();//获取坐标点
+            initLineChart();//初始化
+        }
     }
 
     @Override
@@ -67,9 +78,9 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
     public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList String pDataSource) {
         mFundInfo = (FundInfo) pO;
         Log.d("vbvb", "onLoadDatasSucc: ");
-        //getAxisXLables();//获取x轴的标注
-        //getAxisPoints();//获取坐标点
-        //initLineChart();//初始化
+        getAxisXLables();//获取x轴的标注
+        getAxisPoints();//获取坐标点
+        initLineChart();//初始化
         mFundHistoryPrt.saveFundInfo(mFundInfo);
         super.onLoadDatasSucc(pO,pDataSource);
     }
@@ -89,23 +100,27 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
     /**
      * X 轴的显示
      */
-    /*private void getAxisXLables(){
-        List<FundInfo.FundHistoryBean> lHistoryBeanList = mFundInfo.getFundHistory();
-        for (int i = 0; i < lHistoryBeanList.size(); i++) {
-            String time = DateUtils.getFormateTimeByStamp(lHistoryBeanList.get(i).getX(),"yy/MM/dd");
+    private void getAxisXLables(){
+        Gson lGson = new Gson();
+        DataNetWorthTrend lWorthTrends = lGson.fromJson(mFundInfo.getDataNetWorthTrend(),DataNetWorthTrend.class);
+        List<DataNetWorthTrend.DataNetWorthTrendBean> lDataNetWorthTrendBeens = lWorthTrends.getDataNetWorthTrend();
+        for (int i = 0; i < lDataNetWorthTrendBeens.size(); i++) {
+            String time = DateUtils.getFormateTimeByStamp(lDataNetWorthTrendBeens.get(i).getX(),"yy/MM/dd");
             mAxisXValues.add(new AxisValue(i).setLabel(time));
         }
-    }*/
+    }
 
     /**
      * 图表的每个点的显示
      */
-   /* private void getAxisPoints(){
-        List<FundInfo.FundHistoryBean> lHistoryBeanList = mFundInfo.getFundHistory();
-        for (int i = 0; i < lHistoryBeanList.size(); i++) {
-            mPointValues.add(new PointValue(i, (float) lHistoryBeanList.get(i).getY()));
+    private void getAxisPoints(){
+        Gson lGson = new Gson();
+        DataNetWorthTrend lWorthTrends = lGson.fromJson(mFundInfo.getDataNetWorthTrend(),DataNetWorthTrend.class);
+        List<DataNetWorthTrend.DataNetWorthTrendBean> lDataNetWorthTrendBeens = lWorthTrends.getDataNetWorthTrend();
+        for (int i = 0; i < lDataNetWorthTrendBeens.size(); i++) {
+            mPointValues.add(new PointValue(i, (float) (lDataNetWorthTrendBeens.get(i).getY())));
         }
-    }*/
+    }
 
     /**
      * 初始化LineChart的一些设置
@@ -130,7 +145,7 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
         axisX.setHasTiltedLabels(true);  //X轴下面坐标轴字体是斜的显示还是直的，true是斜的显示
         axisX.setTextColor(Color.parseColor("#212121"));//黑色
 
-	    axisX.setName("基金历史净值");  //表格名称
+	    axisX.setName("基金历史净值"+mFundInfo.getfSCode());  //表格名称
         axisX.setTextSize(11);//设置字体大小
         axisX.setMaxLabelChars(7); //最多几个X轴坐标，意思就是你的缩放让X轴上数据的个数7<=x<=mAxisValues.length
         axisX.setValues(mAxisXValues);  //填充X轴的坐标名称

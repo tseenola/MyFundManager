@@ -1,11 +1,9 @@
 package com.tseenola.jijin.myjijing.biz.fundlist.view;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,7 +14,6 @@ import com.tseenola.jijin.myjijing.R;
 import com.tseenola.jijin.myjijing.adapter.FundListAdapter;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
 import com.tseenola.jijin.myjijing.biz.fundbaseinfo.view.FundBaseInfoAty;
-import com.tseenola.jijin.myjijing.biz.fundhistory.model.FundInfo;
 import com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo;
 import com.tseenola.jijin.myjijing.biz.fundlist.presenter.FundListPrt;
 import com.tseenola.jijin.myjijing.biz.fundlist.presenter.IFundListPrt;
@@ -25,14 +22,10 @@ import com.tseenola.jijin.myjijing.utils.Constant;
 import org.litepal.crud.DataSupport;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static android.R.attr.key;
 
 
 public class FundListAty extends BaseAty implements IFundListAty {
@@ -66,15 +59,7 @@ public class FundListAty extends BaseAty implements IFundListAty {
 
     @Override
     public void onLoadDatasSucc(Object pO, @Constant.DATA_SOURCE.SourceList final String pDataSource) {
-        FundListInfo lFundListInfo = new FundListInfo();
-        lFundListInfo.setFundCode("999999");
-        lFundListInfo.setFundAbbr("xxxx3");
-        lFundListInfo.setFundName("ab3");
-        lFundListInfo.setFundPingYing("pingying3");
-        lFundListInfo.setFundType("c3");
-        lFundListInfo.setTest2(false);
-        lFundListInfo.save();
-        /*mFundInfos = (List<FundListInfo>) pO;
+        mFundInfos = (List<FundListInfo>) pO;
         mFundListAdapter = new FundListAdapter(this, mFundInfos, R.layout.item_fundlist);
         mLvFund.setAdapter(mFundListAdapter);
         mLvFund.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -89,7 +74,7 @@ public class FundListAty extends BaseAty implements IFundListAty {
         if (pDataSource.equals(Constant.DATA_SOURCE.FROM_NET)) {
             mMainPresenter.saveFundList(mFundInfos);
         }
-        Log.d("vbvb", "onLoadDatasSucc currentThread: " + Thread.currentThread().getId());*/
+        Log.d("vbvb", "onLoadDatasSucc currentThread: " + Thread.currentThread().getId());
         super.onLoadDatasSucc(pO, pDataSource);
     }
 
@@ -121,12 +106,6 @@ public class FundListAty extends BaseAty implements IFundListAty {
 
     @Override
     protected void onDestroy() {
-        /*Map<Integer,Boolean> lBooleanMap = mFundListAdapter.getCbSelectedMap();
-        Set<Integer> lIntegers = lBooleanMap.keySet();
-
-        for (int i = 0;i<lIntegers.size();i++){
-            DataSupport.where()
-        }*/
         super.onDestroy();
     }
 }
