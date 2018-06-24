@@ -1,11 +1,14 @@
 package com.tseenola.jijin.myjijing.biz.fundlist.view;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -20,15 +23,20 @@ import com.tseenola.jijin.myjijing.biz.fundlist.presenter.IFundListPrt;
 import com.tseenola.jijin.myjijing.utils.Constant;
 
 import org.litepal.crud.DataSupport;
+import org.litepal.crud.callback.UpdateOrDeleteCallback;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static org.litepal.crud.DataSupport.where;
 
-public class FundListAty extends BaseAty implements IFundListAty {
+
+public class FundListAty extends BaseAty implements IFundListAty, CompoundButton.OnCheckedChangeListener {
 
     @Bind(R.id.lv_Fund)
     ListView mLvFund;
@@ -36,6 +44,8 @@ public class FundListAty extends BaseAty implements IFundListAty {
     EditText mEtFundCode;
     @Bind(R.id.bt_Query)
     Button mBtQuery;
+    @Bind(R.id.cb_SelectAll)
+    CheckBox mCbSelectAll;
     private IFundListPrt mMainPresenter;
     private FundListAdapter mFundListAdapter;
     private List<FundListInfo> mFundInfos;
@@ -55,6 +65,7 @@ public class FundListAty extends BaseAty implements IFundListAty {
     public void initView() {
         setContentView(R.layout.activity_fund_list);
         ButterKnife.bind(this);
+        mCbSelectAll.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -89,23 +100,50 @@ public class FundListAty extends BaseAty implements IFundListAty {
     @OnClick(R.id.bt_Query)
     public void onClick() {
         String fcode = mEtFundCode.getText().toString().trim();
-
-        if (TextUtils.isEmpty(fcode)||fcode.length()!=6){
-            Toast.makeText(this, "基金代码错误", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(fcode)){
+            Toast.makeText(this, "请输入查询条件", Toast.LENGTH_SHORT).show();
             return;
         }
-        List<FundListInfo> lFundListInfos = DataSupport.where("fundCode = ?",mEtFundCode.getText().toString()).find(FundListInfo.class);
-        if (lFundListInfos==null || lFundListInfos.size()<=0){
-            Toast.makeText(this, "无记录", Toast.LENGTH_SHORT).show();
-            return;
+        mFundListAdapter.getCbSelectedMap().clear();
+        try {
+            int fcodeInt = Integer.parseInt(fcode);
+            if (TextUtils.isEmpty(fcode) || fcode.length() != 6) {
+                Toast.makeText(this, "基金代码错误", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            List<FundListInfo> lFundListInfos = where("fundCode = ?", mEtFundCode.getText().toString()).find(FundListInfo.class);
+            if (lFundListInfos == null || lFundListInfos.size() <= 0) {
+                Toast.makeText(this, "无记录", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            mFundInfos.clear();
+            mFundInfos.addAll(lFundListInfos);
+            mFundListAdapter.notifyDataSetChanged();
+        } catch (Exception pE) {
+            //不是数字，搜索基金名称，搜索基金类型
+            pE.printStackTrace();
+            List<FundListInfo> lFundListInfos = DataSupport.where("FundType like ? or FundName like ?", "%" + fcode + "%", "%" + fcode + "%").find(FundListInfo.class);
+            mFundInfos.clear();
+            mFundInfos.addAll(lFundListInfos);
+            mFundListAdapter.notifyDataSetChanged();
         }
-        mFundInfos.clear();
-        mFundInfos.addAll(lFundListInfos);
-        mFundListAdapter.notifyDataSetChanged();
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void onCheckedChanged(CompoundButton pCompoundButton, boolean pB) {
+        if (pCompoundButton.getId()==mCbSelectAll.getId()){
+            Map<Integer,Boolean> lMap = mFundListAdapter.getCbSelectedMap();
+            if (pB){
+                for(int i = 0;i<mFundInfos.size();i++){
+                    if (pB){
+                        //lMap.put(i,true);
+                        ((CheckBox)mLvFund.getChildAt(i).findViewById(R.id.cb_Selected)).setChecked(true);
+                    }else {
+                        //lMap.remove(i);
+                        ((CheckBox)mLvFund.getChildAt(i).findViewById(R.id.cb_Selected)).setChecked(false);
+                    }
+                }
+            }
+        }
     }
 }

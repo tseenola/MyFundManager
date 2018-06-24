@@ -5,24 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    <!--<LinearLayout
-        android:id="@+id/ll_FundType"
+    <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <CheckBox
+
+        <TextView
+            android:text="全选"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <CheckBox
+            android:id="@+id/cb_SelectAll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>-->
+    </LinearLayout>
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
