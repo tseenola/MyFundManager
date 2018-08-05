@@ -1,12 +1,12 @@
 package com.tseenola.jijin.myjijing.biz.fundstrategy.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.tseenola.jijin.myjijing.R;
 import com.tseenola.jijin.myjijing.adapter.FundStrategyAdapter;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
+import com.tseenola.jijin.myjijing.biz.backtest.BackTestActivity;
 import com.tseenola.jijin.myjijing.biz.fundhistory.model.FundInfo;
 import com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
@@ -33,6 +34,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.media.CamcorderProfile.get;
+
 /**
  * Created by lenovo on 2018/6/7.
  * 描述：
@@ -47,6 +50,8 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
     Button mBtAnalysis;
     @Bind(R.id.cb_SelectAll)
     CheckBox mCbSelectAll;
+    @Bind(R.id.bt_AnalysisBackTest)
+    Button mBtAnalysisBackTest;
 
     private IFundStrategyPrt mFundStrategyPrt;
     private FundStrategyAdapter mFundStrategyAdapter;
@@ -110,7 +115,7 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
     }
 
 
-    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis})
+    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis,R.id.bt_AnalysisBackTest})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_GetStrategy:
@@ -120,9 +125,9 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
                 mStrategyList = new ArrayList<>();
 
                 //如果是全选直接添加全部
-                if (mCbSelectAll.isChecked()){
+                if (mCbSelectAll.isChecked()) {
                     mStrategyList.addAll(mFundListInfos);
-                }else {
+                } else {
                     for (Integer teger : lIntegers) {
                         mStrategyList.add(mFundListInfos.get(teger));
                     }
@@ -180,6 +185,25 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
                         mFundStrategyAdapter.notifyDataSetChanged();
                     }
                 }).show(getFragmentManager(), "");
+                break;
+            case R.id.bt_AnalysisBackTest:
+                Map<Integer, Boolean> lSelectedMap = mFundStrategyAdapter.getCbSelectedMap();
+                if (lSelectedMap.size()<=0) {
+                    Toast.makeText(this, "请选择一笔基金", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Set<Integer> lKeySet = lSelectedMap.keySet();
+                FundListInfo lFundListInfo = null;
+                for (Integer teger : lKeySet) {
+                    lFundListInfo = mFundListInfos.get(teger);
+                    break;
+                }
+                FundInfo lFundInfos = DataSupport.where("fSCode = ?", lFundListInfo.getFundCode()).findFirst(FundInfo.class);
+                if (lFundInfos != null) {
+                    BackTestActivity.launch(this,lFundInfos);
+                } else {
+                    Toast.makeText(FundStrategyAty.this, "无历史数据", Toast.LENGTH_SHORT).show();
+                }
                 break;
             default:
                 break;

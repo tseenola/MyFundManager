@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.tseenola.jijin.myjijing.biz.fundhistory.view.FundHistoryAty;
 import com.tseenola.jijin.myjijing.biz.fundlist.view.FundListAty;
@@ -15,8 +16,6 @@ import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static android.R.attr.x;
 
 /**
  * Created by lenovo on 2018/5/31.
@@ -57,11 +56,13 @@ public class MainMenuActivity extends Activity {
                 }catch(Exception pE){
                     Log.d("vbvb", "onClick: 发送邮件失败");
                     pE.printStackTrace();
+                    Toast.makeText(this, "发送邮件失败", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.bt_FundStrategy:
                 startActivity(new Intent(this, FundStrategyAty.class));
                 break;
+
             default:
                 break;
         }

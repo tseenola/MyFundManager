@@ -168,7 +168,7 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
         //设置行为属性，支持缩放、滑动以及平移
         mLineChart.setInteractive(true);
         mLineChart.setZoomType(ZoomType.HORIZONTAL);  //缩放类型，水平
-        mLineChart.setMaxZoom((float) 3);//缩放比例
+        mLineChart.setMaxZoom((float) mAxisXValues.size()/7);//缩放比例
         mLineChart.setLineChartData(data);
         mLineChart.setVisibility(View.VISIBLE);
         /**注：下面的7，10只是代表一个数字去类比而已

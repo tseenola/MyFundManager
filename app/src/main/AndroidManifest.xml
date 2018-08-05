@@ -40,6 +40,9 @@
 
         <activity android:name=".biz.fundstrategy.view.FundStrategyAty"
             android:label="基金策略"/>
+
+        <activity android:name=".biz.backtest.BackTestActivity"
+                  android:label="策略回测"/>
     </application>
 
 </manifest>

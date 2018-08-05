@@ -22,7 +22,15 @@
 
     <Button
         android:id="@+id/bt_Analysis"
-        android:text="分析"
+        android:text="指定天数当前净值最低列表"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/bt_AnalysisBackTest"
+        android:text="指定天数当前净值最低策略回测"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
 </LinearLayout>
