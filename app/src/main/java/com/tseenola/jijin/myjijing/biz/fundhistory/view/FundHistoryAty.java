@@ -14,6 +14,7 @@ import com.tseenola.jijin.myjijing.biz.fundhistory.presenter.FundHistoryPrt;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
 import com.tseenola.jijin.myjijing.utils.Constant;
 import com.tseenola.jijin.myjijing.utils.DateUtils;
+import com.tseenola.jijin.myjijing.utils.MathUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.LineChartView;
 
+
 /**
  * Created by lenovo on 2018/6/1.
  * 描述：
@@ -46,13 +48,18 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
     LineChartView mLineChart;
     private FundHistoryPrt mFundHistoryPrt;
     private FundInfo mFundInfo;
-    private ArrayList<PointValue> mPointValues;
-    private ArrayList<AxisValue> mAxisXValues;
+    private ArrayList<PointValue> mPointValues_Y;
+    private ArrayList<AxisValue> mAxisValues_X;
+    private ArrayList<PointValue> mPointValues_Y_Avg;
+    private ArrayList<PointValue> mPointValues_Y_Std;
 
     @Override
     public void initData() {
-        mPointValues = new ArrayList<PointValue>();
-        mAxisXValues = new ArrayList<AxisValue>();
+        mPointValues_Y = new ArrayList<PointValue>();//y轴值，基金净值
+        mPointValues_Y_Avg = new ArrayList<PointValue>();//y轴值，净值平均值
+        mPointValues_Y_Std = new ArrayList<PointValue>();//y轴值，净值标准差
+
+        mAxisValues_X = new ArrayList<AxisValue>();//x轴坐标
         Serializable lFundListInfo  = getIntent().getSerializableExtra("FundInfo");
         if (lFundListInfo!=null){
             mFundInfo = (FundInfo) lFundListInfo;
@@ -106,19 +113,27 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
         List<DataNetWorthTrend.DataNetWorthTrendBean> lDataNetWorthTrendBeens = lWorthTrends.getDataNetWorthTrend();
         for (int i = 0; i < lDataNetWorthTrendBeens.size(); i++) {
             String time = DateUtils.getFormateTimeByStamp(lDataNetWorthTrendBeens.get(i).getX(),"yy/MM/dd");
-            mAxisXValues.add(new AxisValue(i).setLabel(time));
+            mAxisValues_X.add(new AxisValue(i).setLabel(time));
         }
     }
 
     /**
-     * 图表的每个点的显示
+     * 图表的每个点的显示 Y 轴的值
      */
     private void getAxisPoints(){
+        float sum = 0.0f;//基金净值的总值
         Gson lGson = new Gson();
         DataNetWorthTrend lWorthTrends = lGson.fromJson(mFundInfo.getDataNetWorthTrend(),DataNetWorthTrend.class);
         List<DataNetWorthTrend.DataNetWorthTrendBean> lDataNetWorthTrendBeens = lWorthTrends.getDataNetWorthTrend();
+        ArrayList<Double> lStdData = new ArrayList<>();
         for (int i = 0; i < lDataNetWorthTrendBeens.size(); i++) {
-            mPointValues.add(new PointValue(i, (float) (lDataNetWorthTrendBeens.get(i).getY())));
+            lStdData.add( lDataNetWorthTrendBeens.get(i).getY());
+            float stdVal = (float) new MathUtils().getStandardDiviation(lStdData);
+            mPointValues_Y_Std.add(new PointValue(i,0.8f+stdVal));//净值标准差
+
+            sum += (float) (lDataNetWorthTrendBeens.get(i).getY());
+            mPointValues_Y_Avg.add(new PointValue(i,sum/(i+1)));//净值平均值
+            mPointValues_Y.add(new PointValue(i, (float) (lDataNetWorthTrendBeens.get(i).getY())));//净值
         }
     }
 
@@ -126,8 +141,9 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
      * 初始化LineChart的一些设置
      */
     private void initLineChart(){
-        Line line = new Line(mPointValues).setColor(Color.parseColor("#0000FF"));  //折线的颜色
         List<Line> lines = new ArrayList<Line>();
+        //基金净值
+        Line line = new Line(mPointValues_Y).setColor(Color.parseColor("#0000FF"));  //折线的颜色
         line.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
         line.setCubic(false);//曲线是否平滑
 	    line.setStrokeWidth(1);//线条的粗细，默认是3
@@ -137,6 +153,33 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
         line.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
         line.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
         lines.add(line);
+
+        //基金净值平均值
+        Line avgline = new Line(mPointValues_Y_Avg).setColor(Color.parseColor("#FF0000"));  //折线的颜色
+        avgline.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
+        avgline.setCubic(false);//曲线是否平滑
+        avgline.setStrokeWidth(1);//线条的粗细，默认是3
+        avgline.setFilled(false);//是否填充曲线的面积
+        avgline.setHasLabels(false);//曲线的数据坐标是否加上备注
+//		avgline.setHasLabelsOnlyForSelected(true);//点击数据坐标提示数据（设置了这个line.setHasLabels(true);就无效）
+        avgline.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
+        avgline.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
+        lines.add(avgline);
+
+
+        //基金净值平均值
+        Line stdline = new Line(mPointValues_Y_Std).setColor(Color.parseColor("#CDCD00"));  //折线的颜色
+        stdline.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
+        stdline.setCubic(false);//曲线是否平滑
+        stdline.setStrokeWidth(1);//线条的粗细，默认是3
+        stdline.setFilled(false);//是否填充曲线的面积
+        stdline.setHasLabels(false);//曲线的数据坐标是否加上备注
+//		stdline.setHasLabelsOnlyForSelected(true);//点击数据坐标提示数据（设置了这个line.setHasLabels(true);就无效）
+        stdline.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
+        stdline.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
+        lines.add(stdline);
+
+
         LineChartData data = new LineChartData();
         data.setLines(lines);
 
@@ -148,7 +191,7 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
 	    axisX.setName("基金历史净值"+mFundInfo.getfSCode());  //表格名称
         axisX.setTextSize(11);//设置字体大小
         axisX.setMaxLabelChars(7); //最多几个X轴坐标，意思就是你的缩放让X轴上数据的个数7<=x<=mAxisValues.length
-        axisX.setValues(mAxisXValues);  //填充X轴的坐标名称
+        axisX.setValues(mAxisValues_X);  //填充X轴的坐标名称
         data.setAxisXBottom(axisX); //x 轴在底部
         axisX.setHasLines(true); //x 轴分割线
 
@@ -168,7 +211,7 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
         //设置行为属性，支持缩放、滑动以及平移
         mLineChart.setInteractive(true);
         mLineChart.setZoomType(ZoomType.HORIZONTAL);  //缩放类型，水平
-        mLineChart.setMaxZoom((float) mAxisXValues.size()/7);//缩放比例
+        mLineChart.setMaxZoom((float) mAxisValues_X.size()/7);//缩放比例
         mLineChart.setLineChartData(data);
         mLineChart.setVisibility(View.VISIBLE);
         /**注：下面的7，10只是代表一个数字去类比而已
