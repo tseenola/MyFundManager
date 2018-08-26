@@ -43,6 +43,9 @@
 
         <activity android:name=".biz.backtest.BackTestActivity"
                   android:label="策略回测"/>
+
+        <activity android:name=".biz.ma_backtest.MABackTestActivity"
+                  android:label="移动平均线策略"/>
     </application>
 
 </manifest>

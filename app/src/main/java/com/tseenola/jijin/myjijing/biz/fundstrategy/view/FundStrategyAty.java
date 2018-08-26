@@ -1,6 +1,5 @@
 package com.tseenola.jijin.myjijing.biz.fundstrategy.view;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +19,7 @@ import com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.presenter.FundStrategyPrt;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.presenter.IFundStrategyPrt;
+import com.tseenola.jijin.myjijing.biz.ma_backtest.MABackTestActivity;
 import com.tseenola.jijin.myjijing.utils.Constant;
 import com.tseenola.jijin.myjijing.utils.DialogUtils;
 
@@ -34,7 +34,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static android.media.CamcorderProfile.get;
+import static android.os.Build.VERSION_CODES.M;
 
 /**
  * Created by lenovo on 2018/6/7.
@@ -52,6 +52,8 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
     CheckBox mCbSelectAll;
     @Bind(R.id.bt_AnalysisBackTest)
     Button mBtAnalysisBackTest;
+    @Bind(R.id.bt_MABackTest)
+    Button mBtMABackTest;
 
     private IFundStrategyPrt mFundStrategyPrt;
     private FundStrategyAdapter mFundStrategyAdapter;
@@ -115,7 +117,7 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
     }
 
 
-    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis,R.id.bt_AnalysisBackTest})
+    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis, R.id.bt_AnalysisBackTest,R.id.bt_MABackTest})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_GetStrategy:
@@ -187,26 +189,40 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
                 }).show(getFragmentManager(), "");
                 break;
             case R.id.bt_AnalysisBackTest:
-                Map<Integer, Boolean> lSelectedMap = mFundStrategyAdapter.getCbSelectedMap();
-                if (lSelectedMap.size()<=0) {
-                    Toast.makeText(this, "请选择一笔基金", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Set<Integer> lKeySet = lSelectedMap.keySet();
-                FundListInfo lFundListInfo = null;
-                for (Integer teger : lKeySet) {
-                    lFundListInfo = mFundListInfos.get(teger);
-                    break;
-                }
-                FundInfo lFundInfos = DataSupport.where("fSCode = ?", lFundListInfo.getFundCode()).findFirst(FundInfo.class);
-                if (lFundInfos != null) {
-                    BackTestActivity.launch(this,lFundInfos);
-                } else {
+                FundInfo lFundInfo = getSelectFundInfo();
+                if (lFundInfo==null) {
                     Toast.makeText(FundStrategyAty.this, "无历史数据", Toast.LENGTH_SHORT).show();
+                }else {
+                    BackTestActivity.launch(this, lFundInfo);
                 }
+
+                break;
+           case R.id.bt_MABackTest:
+               FundInfo lFundInfo2 = getSelectFundInfo();
+               if (lFundInfo2==null) {
+                   Toast.makeText(FundStrategyAty.this, "无历史数据", Toast.LENGTH_SHORT).show();
+               }else {
+                   MABackTestActivity.launch(this, lFundInfo2);
+               }
                 break;
             default:
                 break;
+        }
+    }
+
+    public FundInfo getSelectFundInfo(){
+        Map<Integer, Boolean> lSelectedMap = mFundStrategyAdapter.getCbSelectedMap();
+        if (lSelectedMap.size() <= 0) {
+            return null;
+        }else {
+            Set<Integer> lKeySet = lSelectedMap.keySet();
+            FundListInfo lFundListInfo = null;
+            for (Integer teger : lKeySet) {
+                lFundListInfo = mFundListInfos.get(teger);
+                break;
+            }
+            FundInfo lFundInfos = DataSupport.where("fSCode = ?", lFundListInfo.getFundCode()).findFirst(FundInfo.class);
+            return lFundInfos;
         }
     }
 }
