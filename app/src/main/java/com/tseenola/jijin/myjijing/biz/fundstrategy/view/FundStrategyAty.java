@@ -34,8 +34,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static android.os.Build.VERSION_CODES.M;
-
 /**
  * Created by lenovo on 2018/6/7.
  * 描述：
@@ -54,6 +52,8 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
     Button mBtAnalysisBackTest;
     @Bind(R.id.bt_MABackTest)
     Button mBtMABackTest;
+    @Bind(R.id.bt_MAMinBackTest)
+    Button mBtMADownBackTest;
 
     private IFundStrategyPrt mFundStrategyPrt;
     private FundStrategyAdapter mFundStrategyAdapter;
@@ -117,7 +117,7 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
     }
 
 
-    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis, R.id.bt_AnalysisBackTest,R.id.bt_MABackTest})
+    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis, R.id.bt_AnalysisBackTest, R.id.bt_MABackTest,R.id.bt_MADownBackTest})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_GetStrategy:
@@ -190,31 +190,38 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
                 break;
             case R.id.bt_AnalysisBackTest:
                 FundInfo lFundInfo = getSelectFundInfo();
-                if (lFundInfo==null) {
+                if (lFundInfo == null) {
                     Toast.makeText(FundStrategyAty.this, "无历史数据", Toast.LENGTH_SHORT).show();
-                }else {
+                } else {
                     BackTestActivity.launch(this, lFundInfo);
                 }
-
                 break;
-           case R.id.bt_MABackTest:
-               FundInfo lFundInfo2 = getSelectFundInfo();
-               if (lFundInfo2==null) {
-                   Toast.makeText(FundStrategyAty.this, "无历史数据", Toast.LENGTH_SHORT).show();
-               }else {
-                   MABackTestActivity.launch(this, lFundInfo2);
-               }
+            case R.id.bt_MABackTest:
+                FundInfo lFundInfo2 = getSelectFundInfo();
+                if (lFundInfo2 == null) {
+                    Toast.makeText(FundStrategyAty.this, "无历史数据", Toast.LENGTH_SHORT).show();
+                } else {
+                    MABackTestActivity.launch(this, lFundInfo2);
+                }
+                break;
+            case R.id.bt_MAMinBackTest:
+                FundInfo lFundInfo3 = getSelectFundInfo();
+                if (lFundInfo3 == null) {
+                    Toast.makeText(FundStrategyAty.this, "无历史数据", Toast.LENGTH_SHORT).show();
+                } else {
+                    MABackTestActivity.launch(this, lFundInfo3);
+                }
                 break;
             default:
                 break;
         }
     }
 
-    public FundInfo getSelectFundInfo(){
+    public FundInfo getSelectFundInfo() {
         Map<Integer, Boolean> lSelectedMap = mFundStrategyAdapter.getCbSelectedMap();
         if (lSelectedMap.size() <= 0) {
             return null;
-        }else {
+        } else {
             Set<Integer> lKeySet = lSelectedMap.keySet();
             FundListInfo lFundListInfo = null;
             for (Integer teger : lKeySet) {

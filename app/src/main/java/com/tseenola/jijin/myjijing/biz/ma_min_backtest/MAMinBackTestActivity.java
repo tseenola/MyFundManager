@@ -1,4 +1,4 @@
-package com.tseenola.jijin.myjijing.biz.ma_backtest;
+package com.tseenola.jijin.myjijing.biz.ma_min_backtest;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,12 +24,11 @@ import butterknife.OnClick;
 /**
  * Created by lenovo on 2018/8/4.
  * 描述：
- * 1.找出所有上窜平均线的点：金叉
- * 2.找出所有下窜平均线的点：死叉
- * 3.买入后获取买入后的净值最大值，如果当前跌幅大于5%（具体值可设置）就卖出。
+ * 1.如果当前低于平均值并且是最低值就买入
+ * 2.买入后获取买入后的净值最大值，如果当前跌幅大于5%（具体值可设置）就卖出。
  */
 
-public class MABackTestActivity extends BaseAty {
+public class MAMinBackTestActivity extends BaseAty {
 
     private static FundInfo mFundInfo;
     @Bind(R.id.tv_Info)
@@ -65,7 +64,7 @@ public class MABackTestActivity extends BaseAty {
 
     public static void launch(Context pContext, FundInfo pFundInfo) {
         mFundInfo = pFundInfo;
-        pContext.startActivity(new Intent(pContext, MABackTestActivity.class));
+        pContext.startActivity(new Intent(pContext, MAMinBackTestActivity.class));
     }
 
     @OnClick(R.id.bt_Analysis)
@@ -89,13 +88,23 @@ public class MABackTestActivity extends BaseAty {
             sum += pureVal;
             avg = sum / (lI + 1);
             if (pureVal >= avg) {
-                if (!preIsbig) {//金叉
-                    //mTvInfo.append("金叉：" + DateUtils.getFormateTimeByStamp(lWorthTrendBean.getX(), "yyyy/MM/dd") + "\n");
-                    mCurBuyIndex = lI;//当前买入点
+                //当前价格与最高价格比较跌幅达到 5%
+                if (mCurMaxPure <= pureVal){
                     mCurMaxPure = pureVal;
-                    buy = pureVal;
-                    mTvInfo.append("买入："+buy+
-                            " " + DateUtils.getFormateTimeByStamp(lWorthTrendBean.getX(), "yyyy/MM/dd")+"\n");
+                }else {
+                    double lDieFu = (pureVal-mCurMaxPure)/mCurMaxPure;
+                    double lDieFu2 = new BigDecimal(lDieFu).setScale(4,BigDecimal.ROUND_HALF_UP).doubleValue();
+
+                    if (lDieFu2 < mDieFuRate){
+                        sale = pureVal;
+                        mCurBuyIndex = -1;
+                        double upRate = new BigDecimal((sale-buy)/buy).setScale(4,BigDecimal.ROUND_HALF_UP).doubleValue();
+                        mTvInfo.append(
+                                " 当前净值："+pureVal+
+                                        " 卖出"+DateUtils.getFormateTimeByStamp(lWorthTrendBean.getX(), "yyyy/MM/dd")+
+                                        " 收益率：" + upRate+"\n");
+                        lUpRateSum+=upRate;
+                    }
                 }
                 preIsbig = true;
             } else {
@@ -115,26 +124,6 @@ public class MABackTestActivity extends BaseAty {
                 preIsbig = false;
             }
 
-            if (mCurBuyIndex>0){
-                //当前价格与最高价格比较跌幅达到 5%
-                if (mCurMaxPure <= pureVal){
-                    mCurMaxPure = pureVal;
-                }else {
-                    double lDieFu = (pureVal-mCurMaxPure)/mCurMaxPure;
-                    double lDieFu2 = new BigDecimal(lDieFu).setScale(4,BigDecimal.ROUND_HALF_UP).doubleValue();
-
-                    if (lDieFu2 < mDieFuRate){
-                        sale = pureVal;
-                        mCurBuyIndex = -1;
-                        double upRate = new BigDecimal((sale-buy)/buy).setScale(4,BigDecimal.ROUND_HALF_UP).doubleValue();
-                        mTvInfo.append(
-                                " 当前净值："+pureVal+
-                                " 卖出"+DateUtils.getFormateTimeByStamp(lWorthTrendBean.getX(), "yyyy/MM/dd")+
-                                " 收益率：" + upRate+"\n");
-                        lUpRateSum+=upRate;
-                    }
-                }
-            }
         }
         mTvInfo.append("\n\n总收益率："+lUpRateSum+"\n");
     }

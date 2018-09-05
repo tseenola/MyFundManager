@@ -1,12 +1,6 @@
 package com.tseenola.jijin.myjijing.utils;
 
-import android.support.annotation.StringDef;
-
-import static com.tseenola.jijin.myjijing.utils.Constant.DATA_SOURCE.FROM_DB;
-import static com.tseenola.jijin.myjijing.utils.Constant.DATA_SOURCE.FROM_NET;
-import static com.tseenola.jijin.myjijing.utils.Constant.TaskName.DOWN_FUND_BASE;
-import static com.tseenola.jijin.myjijing.utils.Constant.TaskName.DOWN_FUND_HISTORY;
-import static com.tseenola.jijin.myjijing.utils.Constant.TaskName.DOWN_FUND_LIST;
+        import android.support.annotation.StringDef;
 
 /**
  * Created by lenovo on 2018/5/30.
