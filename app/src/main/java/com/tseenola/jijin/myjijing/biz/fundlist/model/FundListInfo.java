@@ -21,8 +21,17 @@ public class FundListInfo extends DataSupport implements Serializable{
     private String FundPingYing;
     @Column(defaultValue = "0")
     private boolean selected;
+    private String FundRate;
     public String getFundCode() {
         return FundCode;
+    }
+
+    public String getFundRate() {
+        return FundRate;
+    }
+
+    public void setFundRate(String pFundRate) {
+        FundRate = pFundRate;
     }
 
     public void setFundCode(String pFundCode) {

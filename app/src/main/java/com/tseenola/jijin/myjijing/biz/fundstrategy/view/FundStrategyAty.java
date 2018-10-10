@@ -1,6 +1,5 @@
 package com.tseenola.jijin.myjijing.biz.fundstrategy.view;
 
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,6 +23,7 @@ import com.tseenola.jijin.myjijing.utils.Constant;
 import com.tseenola.jijin.myjijing.utils.DialogUtils;
 
 import org.litepal.crud.DataSupport;
+import org.litepal.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +74,17 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
 
     @Override
     public void initData() {
-        mFundListInfos = DataSupport.where("selected = 1").find(FundListInfo.class);
+        mFundListInfos = DataSupport.where("selected = ?","1").find(FundListInfo.class);
+        for (FundListInfo lFundListInfo : mFundListInfos) {
+            FundInfo lFundInfo = DataSupport.where("fSCode = ?",lFundListInfo.getFundCode()).findFirst(FundInfo.class);
+            if (lFundInfo != null) {
+                Log.d("vbvb", "initData: 找到了");
+                lFundListInfo.setFundRate(lFundInfo.getFundRate());
+            }else {
+                Log.d("vbvb", "initData: 没找到");
+            }
+        }
+
         mFundStrategyAdapter = new FundStrategyAdapter(this, mFundListInfos, R.layout.item_fundlist);
         mLvFundList.setAdapter(mFundStrategyAdapter);
         mLvFundList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -117,7 +127,7 @@ public class FundStrategyAty extends BaseAty implements IFundStrategyAty {
     }
 
 
-    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis, R.id.bt_AnalysisBackTest, R.id.bt_MABackTest,R.id.bt_MADownBackTest})
+    @OnClick({R.id.bt_GetStrategy, R.id.bt_Analysis, R.id.bt_AnalysisBackTest, R.id.bt_MABackTest})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_GetStrategy:

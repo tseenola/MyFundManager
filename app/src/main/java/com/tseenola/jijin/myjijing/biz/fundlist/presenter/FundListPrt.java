@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
+import static org.litepal.crud.DataSupport.count;
 import static org.litepal.crud.DataSupport.findAll;
 
 /**
@@ -41,7 +42,8 @@ public class FundListPrt implements IFundListPrt {
          * 基金列表1周更新一次，周期可以通过配置文件配置
          * 基金只显示非自选的基金
          */
-        if (DataSupport.count(FundListInfo.class)==0){
+        int count = DataSupport.count(FundListInfo.class);
+        if (count<=0){
             downLoadFundlist();
         }else {
             //先来个5天更新一次吧
@@ -91,7 +93,12 @@ public class FundListPrt implements IFundListPrt {
                             j++;
                             lFundInfo.setFundPingYing(array[i*5+j]);
                             j++;
-                            lFundInfos.add(lFundInfo);
+                            if (/*lFundInfo.getFundType().contains("股票") ||
+                                    lFundInfo.getFundType().contains("混合") ||
+                                    lFundInfo.getFundType().contains("指数") ||*/
+                                    lFundInfo.getFundType().contains("QDII")){
+                                lFundInfos.add(lFundInfo);//只添加风险高，收益高的基金。
+                            }
                         }
                         mContext.onLoadDatasSucc(lFundInfos,Constant.DATA_SOURCE.FROM_NET);
                     }

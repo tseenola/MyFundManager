@@ -2,6 +2,7 @@ package com.tseenola.jijin.myjijing.adapter;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -39,7 +40,6 @@ public class FundListAdapter extends CommonAdapter<FundListInfo>{
         pCommonViewHolder.setText(R.id.tv_FundName,pFundInfo.getFundName());
         pCommonViewHolder.setText(R.id.tv_FundType,pFundInfo.getFundType());
         CheckBox lCbSelected = pCommonViewHolder.getView(R.id.cb_Selected);
-
         lCbSelected.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton pCompoundButton, boolean pB) {
@@ -60,14 +60,8 @@ public class FundListAdapter extends CommonAdapter<FundListInfo>{
     }
 
     protected void upDateDB(FundListInfo pFundInfo,boolean pB) {
-        ContentValues lContentValues = new ContentValues();
-        lContentValues.put("selected",pB);
-        DataSupport.updateAllAsync(FundListInfo.class,lContentValues,"FundCode = ?",pFundInfo.getFundCode()).listen(new UpdateOrDeleteCallback() {
-            @Override
-            public void onFinish(int rowsAffected) {
-                int i = rowsAffected;
-                Log.d("vbvb", "onFinish: "+i);
-            }
-        });
+        pFundInfo.setSelected(pB);
+        boolean succ = pFundInfo.save();
+        Log.d("vbvb", "upDateDB: "+succ);
     }
 }

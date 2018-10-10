@@ -2,6 +2,7 @@ package com.tseenola.jijin.myjijing.biz.fundlist.view;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -23,16 +24,15 @@ import com.tseenola.jijin.myjijing.biz.fundlist.presenter.IFundListPrt;
 import com.tseenola.jijin.myjijing.utils.Constant;
 
 import org.litepal.crud.DataSupport;
-import org.litepal.crud.callback.UpdateOrDeleteCallback;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static org.litepal.crud.DataSupport.findAll;
 import static org.litepal.crud.DataSupport.where;
 
 
@@ -100,13 +100,12 @@ public class FundListAty extends BaseAty implements IFundListAty, CompoundButton
     @OnClick(R.id.bt_Query)
     public void onClick() {
         String fcode = mEtFundCode.getText().toString().trim();
-        if (TextUtils.isEmpty(fcode)){
+        if (TextUtils.isEmpty(fcode)) {
             Toast.makeText(this, "请输入查询条件", Toast.LENGTH_SHORT).show();
             return;
         }
         mFundListAdapter.getCbSelectedMap().clear();
         try {
-            int fcodeInt = Integer.parseInt(fcode);
             if (TextUtils.isEmpty(fcode) || fcode.length() != 6) {
                 Toast.makeText(this, "基金代码错误", Toast.LENGTH_SHORT).show();
                 return;
@@ -131,18 +130,16 @@ public class FundListAty extends BaseAty implements IFundListAty, CompoundButton
 
     @Override
     public void onCheckedChanged(CompoundButton pCompoundButton, boolean pB) {
-        if (pCompoundButton.getId()==mCbSelectAll.getId()){
-            Map<Integer,Boolean> lMap = mFundListAdapter.getCbSelectedMap();
+        if (pCompoundButton.getId() == mCbSelectAll.getId()) {
+            ContentValues lContentValues = new ContentValues();
             if (pB){
-                for(int i = 0;i<mFundInfos.size();i++){
-                    if (pB){
-                        //lMap.put(i,true);
-                        ((CheckBox)mLvFund.getChildAt(i).findViewById(R.id.cb_Selected)).setChecked(true);
-                    }else {
-                        //lMap.remove(i);
-                        ((CheckBox)mLvFund.getChildAt(i).findViewById(R.id.cb_Selected)).setChecked(false);
-                    }
-                }
+                lContentValues.put("selected","1");
+                int count =  DataSupport.updateAll(FundListInfo.class,lContentValues);
+                Toast.makeText(this, "全选成功:"+count, Toast.LENGTH_SHORT).show();
+            }else {
+                lContentValues.put("selected","0");
+                int count =  DataSupport.updateAll(FundListInfo.class,lContentValues);
+                Toast.makeText(this, "取消全选:"+count, Toast.LENGTH_SHORT).show();
             }
         }
     }
