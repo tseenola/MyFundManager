@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.tseenola.jijin.myjijing.biz.fundhistory.view.FundHistoryAty;
 import com.tseenola.jijin.myjijing.biz.fundlist.view.FundListAty;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.view.FundStrategyAty;
+import com.tseenola.jijin.myjijing.biz.huobi.view.HuoBiAty;
 import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
 
 import butterknife.Bind;
@@ -31,6 +32,8 @@ public class MainMenuActivity extends Activity {
     Button mBtSetting;
     @Bind(R.id.bt_FundStrategy)
     Button mBtFundStrategy;
+    @Bind(R.id.bt_HuoBi)
+    Button mBtHuoBi;
 
 
     @Override
@@ -41,7 +44,7 @@ public class MainMenuActivity extends Activity {
     }
 
 
-    @OnClick({R.id.bt_FundList, R.id.bt_FundHistory, R.id.bt_Setting,R.id.bt_FundStrategy})
+    @OnClick({R.id.bt_FundList, R.id.bt_FundHistory, R.id.bt_Setting, R.id.bt_FundStrategy,R.id.bt_HuoBi})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_FundList:
@@ -51,9 +54,9 @@ public class MainMenuActivity extends Activity {
                 startActivity(new Intent(this, FundHistoryAty.class));
                 break;
             case R.id.bt_Setting:
-                try{
+                try {
                     SendMailUtil.send("641380205@qq.com");
-                }catch(Exception pE){
+                } catch (Exception pE) {
                     Log.d("vbvb", "onClick: 发送邮件失败");
                     pE.printStackTrace();
                     Toast.makeText(this, "发送邮件失败", Toast.LENGTH_SHORT).show();
@@ -62,11 +65,11 @@ public class MainMenuActivity extends Activity {
             case R.id.bt_FundStrategy:
                 startActivity(new Intent(this, FundStrategyAty.class));
                 break;
-
+            case R.id.bt_HuoBi:
+                startActivity(new Intent(this,HuoBiAty.class));
+                break;
             default:
                 break;
         }
     }
-
-
 }
