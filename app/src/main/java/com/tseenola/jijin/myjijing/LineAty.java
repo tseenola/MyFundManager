@@ -26,6 +26,7 @@ import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.model.Viewport;
 
+
 /**
  * Created by lenovo on 2018/10/13.
  * 描述：
@@ -33,6 +34,7 @@ import lecho.lib.hellocharts.model.Viewport;
 
 public class LineAty extends BaseAty {
     private static HistoryKLine mHistoryKLine;
+
     private ArrayList<PointValue> mPointValues_Y;
     private ArrayList<PointValue> mPointValues_Y_Avg;
     private ArrayList<PointValue> mPointValues_Y_Std;
