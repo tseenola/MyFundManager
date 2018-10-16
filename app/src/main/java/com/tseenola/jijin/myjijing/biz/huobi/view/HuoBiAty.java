@@ -10,6 +10,7 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
+import com.tseenola.jijin.myjijing.LineAty;
 import com.tseenola.jijin.myjijing.R;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
@@ -56,7 +57,9 @@ public class HuoBiAty extends BaseAty {
                     @Override
                     public void onSuccess(ResponseInfo<String> pResponseInfo) {
                         Gson lGson = new Gson();
+                        Log.d("vbvb", "onSuccess: "+pResponseInfo.result);
                         HistoryKLine lHistoryKLine = lGson.fromJson(pResponseInfo.result,HistoryKLine.class);
+                        LineAty.launch(HuoBiAty.this,lHistoryKLine);
                     }
 
                     @Override

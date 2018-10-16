@@ -79,6 +79,9 @@
         <activity android:name=".biz.huobi.view.HuoBiAty"
                   android:label="移动平均线策略"/>
 
+        <activity android:name=".LineAty"
+                  android:label="火币boll线策略"/>/>
+
     </application>
 
 </manifest>

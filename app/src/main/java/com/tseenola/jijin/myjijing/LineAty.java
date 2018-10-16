@@ -6,16 +6,13 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 
-import com.google.gson.Gson;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
-import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
-import com.tseenola.jijin.myjijing.utils.DateUtils;
-import com.tseenola.jijin.myjijing.utils.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Axis;
@@ -25,6 +22,7 @@ import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.view.LineChartView;
 
 
 /**
@@ -39,16 +37,14 @@ public class LineAty extends BaseAty {
     private ArrayList<PointValue> mPointValues_Y_Avg;
     private ArrayList<PointValue> mPointValues_Y_Std;
     private ArrayList<AxisValue> mAxisValues_X;
-
+    @Bind(R.id.line_chart)
+    LineChartView mLineChart;
     @Override
     public void initData() {
-        mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
-        mPointValues_Y_Avg = new ArrayList<PointValue>();//y轴值，平均值
-        mPointValues_Y_Std = new ArrayList<PointValue>();//y轴值，标准差
+        for (HistoryKLine.DataBean lDataBean : mHistoryKLine.getData()) {
 
-        mAxisValues_X = new ArrayList<AxisValue>();//x轴坐标
+        }
 
-        Log.d("vbvb", "onLoadDatasSucc: ");
         getAxisXLables();//获取x轴的标注
         getAxisPoints();//获取坐标点
         initLineChart();//初始化
@@ -58,6 +54,14 @@ public class LineAty extends BaseAty {
     public void initView() {
         setContentView(R.layout.activity_fund_history);
         ButterKnife.bind(this);
+
+        mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
+        mPointValues_Y_Avg = new ArrayList<PointValue>();//y轴值，平均值
+        mPointValues_Y_Std = new ArrayList<PointValue>();//y轴值，标准差
+
+        mAxisValues_X = new ArrayList<AxisValue>();//x轴坐标
+
+        Log.d("vbvb", "onLoadDatasSucc: ");
     }
 
     @Override
@@ -71,8 +75,7 @@ public class LineAty extends BaseAty {
     private void getAxisXLables(){
         List<HistoryKLine.DataBean> lDataBeen = mHistoryKLine.getData();
         for (int i = 0; i < lDataBeen.size(); i++) {
-            String time = DateUtils.getFormateTimeByStamp(lDataBeen.get(i).getId(),"yy/MM/dd");
-            mAxisValues_X.add(new AxisValue(i).setLabel(time));
+            mAxisValues_X.add(new AxisValue(i).setLabel(i+""));
         }
     }
 
@@ -81,19 +84,20 @@ public class LineAty extends BaseAty {
      */
     private void getAxisPoints(){
         float sum = 0.0f;//基金净值的总值
-        Gson lGson = new Gson();
-        DataNetWorthTrend lWorthTrends = lGson.fromJson(mFundInfo.getDataNetWorthTrend(),DataNetWorthTrend.class);
-        List<DataNetWorthTrend.DataNetWorthTrendBean> lDataNetWorthTrendBeens = lWorthTrends.getDataNetWorthTrend();
+        List<HistoryKLine.DataBean> lDataBeans = mHistoryKLine.getData();
         ArrayList<Double> lStdData = new ArrayList<>();
-        for (int i = 0; i < lDataNetWorthTrendBeens.size(); i++) {
-            lStdData.add( lDataNetWorthTrendBeens.get(i).getY());
-            float stdVal = (float) new MathUtils().getStandardDiviation(lStdData);
-            mPointValues_Y_Std.add(new PointValue(i,0.8f+stdVal));//净值标准差
 
-            sum += (float) (lDataNetWorthTrendBeens.get(i).getY());
-            mPointValues_Y_Avg.add(new PointValue(i,sum/(i+1)));//净值平均值
-            mPointValues_Y.add(new PointValue(i, (float) (lDataNetWorthTrendBeens.get(i).getY())));//净值
+        for (int i = 0; i < lDataBeans.size(); i++) {
+            // 收盘值
+            double closeVal = lDataBeans.get(lDataBeans.size()-i-1).getClose();
+            mPointValues_Y.add(new PointValue(i, (float) closeVal));//净值
+
+
+            //收盘值平均值
+            sum += (float) (closeVal);
+            mPointValues_Y_Avg.add(new PointValue(i,sum/(i+1)));
         }
+
     }
 
     /**
@@ -113,6 +117,7 @@ public class LineAty extends BaseAty {
         line.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
         lines.add(line);
 
+
         //基金净值平均值
         Line avgline = new Line(mPointValues_Y_Avg).setColor(Color.parseColor("#FF0000"));  //折线的颜色
         avgline.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
@@ -125,20 +130,6 @@ public class LineAty extends BaseAty {
         avgline.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
         lines.add(avgline);
 
-
-        //基金净值平均值
-        Line stdline = new Line(mPointValues_Y_Std).setColor(Color.parseColor("#CDCD00"));  //折线的颜色
-        stdline.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
-        stdline.setCubic(false);//曲线是否平滑
-        stdline.setStrokeWidth(1);//线条的粗细，默认是3
-        stdline.setFilled(false);//是否填充曲线的面积
-        stdline.setHasLabels(false);//曲线的数据坐标是否加上备注
-//		stdline.setHasLabelsOnlyForSelected(true);//点击数据坐标提示数据（设置了这个line.setHasLabels(true);就无效）
-        stdline.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
-        stdline.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
-        lines.add(stdline);
-
-
         LineChartData data = new LineChartData();
         data.setLines(lines);
 
@@ -147,7 +138,7 @@ public class LineAty extends BaseAty {
         axisX.setHasTiltedLabels(true);  //X轴下面坐标轴字体是斜的显示还是直的，true是斜的显示
         axisX.setTextColor(Color.parseColor("#212121"));//黑色
 
-        axisX.setName("基金历史净值"+mFundInfo.getfSCode());  //表格名称
+        axisX.setName("基金历史净值"+mHistoryKLine.getCh());  //表格名称
         axisX.setTextSize(11);//设置字体大小
         axisX.setMaxLabelChars(7); //最多几个X轴坐标，意思就是你的缩放让X轴上数据的个数7<=x<=mAxisValues.length
         axisX.setValues(mAxisValues_X);  //填充X轴的坐标名称
