@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
+import com.tseenola.jijin.myjijing.utils.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,16 +36,13 @@ public class LineAty extends BaseAty {
 
     private ArrayList<PointValue> mPointValues_Y;
     private ArrayList<PointValue> mPointValues_Y_Avg;
-    private ArrayList<PointValue> mPointValues_Y_Std;
+    private ArrayList<PointValue> mPointValues_Y_BollUp;//布林线上轨
+    private ArrayList<PointValue> mPointValues_Y_BollLow;//布林线下轨
     private ArrayList<AxisValue> mAxisValues_X;
     @Bind(R.id.line_chart)
     LineChartView mLineChart;
     @Override
     public void initData() {
-        for (HistoryKLine.DataBean lDataBean : mHistoryKLine.getData()) {
-
-        }
-
         getAxisXLables();//获取x轴的标注
         getAxisPoints();//获取坐标点
         initLineChart();//初始化
@@ -57,8 +55,8 @@ public class LineAty extends BaseAty {
 
         mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
         mPointValues_Y_Avg = new ArrayList<PointValue>();//y轴值，平均值
-        mPointValues_Y_Std = new ArrayList<PointValue>();//y轴值，标准差
-
+        mPointValues_Y_BollUp = new ArrayList<PointValue>();//y轴值，布林线上轨
+        mPointValues_Y_BollLow = new ArrayList<PointValue>();//y轴值，布林线下轨
         mAxisValues_X = new ArrayList<AxisValue>();//x轴坐标
 
         Log.d("vbvb", "onLoadDatasSucc: ");
@@ -85,17 +83,27 @@ public class LineAty extends BaseAty {
     private void getAxisPoints(){
         float sum = 0.0f;//基金净值的总值
         List<HistoryKLine.DataBean> lDataBeans = mHistoryKLine.getData();
-        ArrayList<Double> lStdData = new ArrayList<>();
-
+        List<Double> stdData = new ArrayList<>();
         for (int i = 0; i < lDataBeans.size(); i++) {
             // 收盘值
             double closeVal = lDataBeans.get(lDataBeans.size()-i-1).getClose();
             mPointValues_Y.add(new PointValue(i, (float) closeVal));//净值
 
 
-            //收盘值平均值
+            //收盘值20日平均值
             sum += (float) (closeVal);
-            mPointValues_Y_Avg.add(new PointValue(i,sum/(i+1)));
+            float avg = sum/(i+1);
+            mPointValues_Y_Avg.add(new PointValue(i,avg));
+
+            //标准差
+            stdData.add(closeVal);
+            double std = new MathUtils().getStandardDiviation(stdData);
+            //上轨:n天收盘价的移动平均线 + m * n 天收盘价格的标准差
+            int m = 1;
+            mPointValues_Y_BollUp.add(new PointValue(i, (float) (avg+m*std)));
+
+            //下轨：n天收盘价的移动平均线 - m * n 天收盘价格的标准差
+            mPointValues_Y_BollLow.add(new PointValue(i, (float) (avg-m*std)));
         }
 
     }
@@ -105,30 +113,52 @@ public class LineAty extends BaseAty {
      */
     private void initLineChart(){
         List<Line> lines = new ArrayList<Line>();
-        //基金净值
+        //收盘价
         Line line = new Line(mPointValues_Y).setColor(Color.parseColor("#0000FF"));  //折线的颜色
         line.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
         line.setCubic(false);//曲线是否平滑
         line.setStrokeWidth(1);//线条的粗细，默认是3
         line.setFilled(false);//是否填充曲线的面积
         line.setHasLabels(false);//曲线的数据坐标是否加上备注
-//		line.setHasLabelsOnlyForSelected(true);//点击数据坐标提示数据（设置了这个line.setHasLabels(true);就无效）
         line.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
         line.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
         lines.add(line);
 
 
-        //基金净值平均值
+        //收盘价平均值-boll线中轨
         Line avgline = new Line(mPointValues_Y_Avg).setColor(Color.parseColor("#FF0000"));  //折线的颜色
         avgline.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
         avgline.setCubic(false);//曲线是否平滑
         avgline.setStrokeWidth(1);//线条的粗细，默认是3
         avgline.setFilled(false);//是否填充曲线的面积
         avgline.setHasLabels(false);//曲线的数据坐标是否加上备注
-//		avgline.setHasLabelsOnlyForSelected(true);//点击数据坐标提示数据（设置了这个line.setHasLabels(true);就无效）
         avgline.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
         avgline.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
         lines.add(avgline);
+
+        //boll线上轨
+        Line bollUpLine = new Line(mPointValues_Y_BollUp).setColor(Color.parseColor("#28004D"));  //折线的颜色
+        bollUpLine.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
+        bollUpLine.setCubic(false);//曲线是否平滑
+        bollUpLine.setStrokeWidth(1);//线条的粗细，默认是3
+        bollUpLine.setFilled(false);//是否填充曲线的面积
+        bollUpLine.setHasLabels(false);//曲线的数据坐标是否加上备注
+        bollUpLine.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
+        bollUpLine.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
+        lines.add(bollUpLine);
+
+
+        //boll线上轨
+        Line bollLowLine = new Line(mPointValues_Y_BollLow).setColor(Color.parseColor("#9F35FF"));  //折线的颜色
+        bollLowLine.setShape(ValueShape.CIRCLE);//折线图上每个数据点的形状  这里是圆形 （有三种 ：ValueShape.SQUARE  ValueShape.CIRCLE  ValueShape.SQUARE）
+        bollLowLine.setCubic(false);//曲线是否平滑
+        bollLowLine.setStrokeWidth(1);//线条的粗细，默认是3
+        bollLowLine.setFilled(false);//是否填充曲线的面积
+        bollLowLine.setHasLabels(false);//曲线的数据坐标是否加上备注
+        bollLowLine.setHasLines(true);//是否用直线显示。如果为false 则没有曲线只有点显示
+        bollLowLine.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示
+        lines.add(bollLowLine);
+
 
         LineChartData data = new LineChartData();
         data.setLines(lines);
@@ -185,5 +215,17 @@ public class LineAty extends BaseAty {
         pContext.startActivity(new Intent(pContext,LineAty.class));
         mHistoryKLine = pHistoryKLine;
 
+    }
+
+
+    /**
+     *
+     * @param pDatas
+     * @param pDay 多少日均线
+     */
+    public void getAvg(List<Double> pDatas,int pDay){
+        if (pDatas==null || pDatas.size()<=0 || pDay<=0) {
+            throw new IllegalArgumentException("参数无效");
+        }
     }
 }

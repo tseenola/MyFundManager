@@ -4,8 +4,12 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.tseenola.jijin.myjijing.biz.fundhistory.model.FundVals;
+import com.tseenola.jijin.myjijing.utils.MathUtils;
 
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -271,5 +275,17 @@ public class ExampleUnitTest {
 
         return sum;
 
+    }
+
+    @Test
+    public void testStd(){
+        List<Double> lDatas = new ArrayList<>();
+        lDatas.add(27d);
+        lDatas.add(24d);
+        lDatas.add(26d);
+        lDatas.add(33d);
+        lDatas.add(45d);
+        double val = new MathUtils().getStandardDiviation(lDatas);
+        int i = 0;
     }
 }
