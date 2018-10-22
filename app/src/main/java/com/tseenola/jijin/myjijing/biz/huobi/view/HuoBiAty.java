@@ -28,7 +28,7 @@ public class HuoBiAty extends BaseAty {
     @Bind(R.id.bt_GetKLine)
     Button mBtGetKLine;
     private String dmain = "https://api.huobi.br.com";
-    private String kLineUrl = "/market/history/kline?symbol=btcusdt&period=1day&size=2000";
+    private String kLineUrl = "/market/history/kline?symbol=htusdt&period=5min&size=2000";
 
     @Override
     public void initData() {

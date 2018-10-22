@@ -11,6 +11,7 @@ import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
 import com.tseenola.jijin.myjijing.utils.MathUtils;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -81,9 +82,8 @@ public class LineAty extends BaseAty {
      * 图表的每个点的显示 Y 轴的值
      */
     private void getAxisPoints(){
-        float sum = 0.0f;//基金净值的总值
         List<HistoryKLine.DataBean> lDataBeans = mHistoryKLine.getData();
-        List<Double> stdData = new ArrayList<>();
+        LinkedList<Double> stdData20 = new LinkedList<>();
         for (int i = 0; i < lDataBeans.size(); i++) {
             // 收盘值
             double closeVal = lDataBeans.get(lDataBeans.size()-i-1).getClose();
@@ -91,15 +91,20 @@ public class LineAty extends BaseAty {
 
 
             //收盘值20日平均值
-            sum += (float) (closeVal);
-            float avg = sum/(i+1);
+            float avg = (float) getNDaysAvg(closeVal,20);
             mPointValues_Y_Avg.add(new PointValue(i,avg));
 
             //标准差
-            stdData.add(closeVal);
-            double std = new MathUtils().getStandardDiviation(stdData);
+            if (stdData20.size()<19) {//20日均线
+                stdData20.add(closeVal);
+            }else {
+                stdData20.removeFirst();
+                stdData20.add(closeVal);
+            }
+            //stdData.add(closeVal);
+            double std = new MathUtils().getStandardDiviation(stdData20);
             //上轨:n天收盘价的移动平均线 + m * n 天收盘价格的标准差
-            int m = 1;
+            double m = 2d;
             mPointValues_Y_BollUp.add(new PointValue(i, (float) (avg+m*std)));
 
             //下轨：n天收盘价的移动平均线 - m * n 天收盘价格的标准差
@@ -217,15 +222,27 @@ public class LineAty extends BaseAty {
 
     }
 
-
     /**
-     *
-     * @param pDatas
-     * @param pDay 多少日均线
+     * 多少日均线
+     * @param pCloseVal
+     * @param pDay
+     * @return
      */
-    public void getAvg(List<Double> pDatas,int pDay){
-        if (pDatas==null || pDatas.size()<=0 || pDay<=0) {
+    LinkedList<Double> mLinkedList = new LinkedList<>();
+    public double getNDaysAvg(double pCloseVal,int pDay){
+        if (pCloseVal<0 || pDay<=0) {
             throw new IllegalArgumentException("参数无效");
         }
+        if (mLinkedList.size()<19) {
+            mLinkedList.add(pCloseVal);
+        }else{
+            mLinkedList.removeFirst();
+            mLinkedList.add(pCloseVal);
+        }
+        double sum = 0d;
+        for (int lI = mLinkedList.size() - 1; lI >= 0; lI--) {
+            sum += mLinkedList.get(lI);
+        }
+        return sum/mLinkedList.size();
     }
 }
