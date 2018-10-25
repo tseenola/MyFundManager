@@ -33,17 +33,23 @@ import lecho.lib.hellocharts.view.LineChartView;
  */
 
 public class LineAty extends BaseAty {
-    private static HistoryKLine mHistoryKLine;
+    protected static HistoryKLine mHistoryKLine;
 
-    private ArrayList<PointValue> mPointValues_Y;
-    private ArrayList<PointValue> mPointValues_Y_Avg;
-    private ArrayList<PointValue> mPointValues_Y_BollUp;//布林线上轨
-    private ArrayList<PointValue> mPointValues_Y_BollLow;//布林线下轨
-    private ArrayList<AxisValue> mAxisValues_X;
+    protected ArrayList<PointValue> mPointValues_Y;
+    protected ArrayList<PointValue> mPointValues_Y_Avg;
+    protected ArrayList<PointValue> mPointValues_Y_BollUp;//布林线上轨
+    protected ArrayList<PointValue> mPointValues_Y_BollLow;//布林线下轨
+    protected ArrayList<AxisValue> mAxisValues_X;
     @Bind(R.id.line_chart)
     LineChartView mLineChart;
     @Override
     public void initData() {
+        mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
+        mPointValues_Y_Avg = new ArrayList<PointValue>();//y轴值，平均值
+        mPointValues_Y_BollUp = new ArrayList<PointValue>();//y轴值，布林线上轨
+        mPointValues_Y_BollLow = new ArrayList<PointValue>();//y轴值，布林线下轨
+        mAxisValues_X = new ArrayList<AxisValue>();//x轴坐标
+
         getAxisXLables();//获取x轴的标注
         getAxisPoints();//获取坐标点
         initLineChart();//初始化
@@ -53,13 +59,6 @@ public class LineAty extends BaseAty {
     public void initView() {
         setContentView(R.layout.activity_fund_history);
         ButterKnife.bind(this);
-
-        mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
-        mPointValues_Y_Avg = new ArrayList<PointValue>();//y轴值，平均值
-        mPointValues_Y_BollUp = new ArrayList<PointValue>();//y轴值，布林线上轨
-        mPointValues_Y_BollLow = new ArrayList<PointValue>();//y轴值，布林线下轨
-        mAxisValues_X = new ArrayList<AxisValue>();//x轴坐标
-
         Log.d("vbvb", "onLoadDatasSucc: ");
     }
 
@@ -219,7 +218,6 @@ public class LineAty extends BaseAty {
     public static void launch (Context pContext,  HistoryKLine  pHistoryKLine){
         pContext.startActivity(new Intent(pContext,LineAty.class));
         mHistoryKLine = pHistoryKLine;
-
     }
 
     /**

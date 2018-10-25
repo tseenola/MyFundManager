@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.tseenola.jijin.myjijing.utils.Constant;
 import com.tseenola.jijin.myjijing.utils.DialogUtils;
 
@@ -16,7 +15,6 @@ import com.tseenola.jijin.myjijing.utils.DialogUtils;
  */
 
 public abstract class BaseAty<T> extends Activity implements IBaseAty,AdapterView.OnItemClickListener{
-    protected MaterialDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

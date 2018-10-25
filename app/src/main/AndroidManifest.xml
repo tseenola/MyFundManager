@@ -80,8 +80,10 @@
                   android:label="移动平均线策略"/>
 
         <activity android:name=".LineAty"
-                  android:label="火币boll线策略"/>/>
+                  android:label="火币boll线策略"/>
 
+        <activity android:name=".biz.huobi.view.BollBackTestAty"
+            android:label="火币boll线策略回测"/>
     </application>
 
 </manifest>
