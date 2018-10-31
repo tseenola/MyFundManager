@@ -53,7 +53,8 @@ public class BollBackTestAty extends LineAty {
      */
     private void bollStdStrategy2() {
         double preCloseVal = 0d;
-        StringBuilder info = new StringBuilder("");
+        double preBollDownVal = 0d;
+        double preAvgVal = 0d;
         int curStatus = STATUS_NULL;
         double shouYiRateSum = 0;//收益率
         double curHoldVal = 0d;//当前持有价格
@@ -64,24 +65,28 @@ public class BollBackTestAty extends LineAty {
             double avgVal = mPointValues_Y_Avg.get(i).getY();
             if (i == 0) {
                 preCloseVal = closeVal;
+                preBollDownVal = bollDownVal;
+                preAvgVal = avgVal;
             }
 
-            if (closeVal > bollDownVal && preCloseVal < bollDownVal && curStatus ==STATUS_NULL) {//1.收盘价从下穿过下轨
+            if (closeVal > bollDownVal && preCloseVal < preBollDownVal && curStatus ==STATUS_NULL) {//1.收盘价从下穿过下轨
                 tvInfo.append("买入："+i +" close:"+closeVal + "\n");
                 curStatus = STATUS_HOLD;
                 curHoldVal = closeVal;
-            } else if(closeVal < bollDownVal && preCloseVal > bollDownVal && curStatus == STATUS_HOLD){//持有状态下-收盘价从上穿过下轨道，卖出（防止继续跌）
+            } else if(closeVal < bollDownVal && preCloseVal > preBollDownVal && curStatus == STATUS_HOLD){//持有状态下-收盘价从上穿过下轨道，卖出（防止继续跌）
                 double curShouYiRate = (closeVal-curHoldVal)/curHoldVal;
                 shouYiRateSum += curShouYiRate;
                 tvInfo.append("卖出："+i + " close:"+closeVal + "收益率："+curShouYiRate * 100 + "%\n");
                 curStatus = STATUS_NULL;
-            }else if (closeVal > avgVal && preCloseVal < avgVal && curStatus == STATUS_HOLD) {//3.收盘价从下穿过中轨，卖出
+            }else if (closeVal > avgVal && preCloseVal < preAvgVal && curStatus == STATUS_HOLD) {//3.收盘价从下穿过中轨，卖出
                 double curShouYiRate = (closeVal-curHoldVal)/curHoldVal;
                 shouYiRateSum += curShouYiRate;
                 tvInfo.append("卖出："+i + " close:"+closeVal + "收益率："+curShouYiRate * 100 + "%\n");
                 curStatus = STATUS_NULL;
             }
             preCloseVal = closeVal;
+            preBollDownVal = bollDownVal;
+            preAvgVal = avgVal;
         }
         tvInfo.append("收益率："+shouYiRateSum * 100 +"%\n");
     }
@@ -93,7 +98,6 @@ public class BollBackTestAty extends LineAty {
      */
     private void bollStdStrategy() {
         double preCloseVal = 0d;
-        StringBuilder info = new StringBuilder("");
         int curStatus = STATUS_NULL;
         double shouYiRateSum = 0;//收益率
         double curHoldVal = 0d;//当前持有价格

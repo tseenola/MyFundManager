@@ -73,4 +73,11 @@ public class ExampleInstrumentedTest {
 
         Log.d("vbvb", "useAppContext: ==========================================================");
     }
+
+
+    @Test
+    public void testMACD() throws Exception {
+
+    }
+
 }

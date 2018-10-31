@@ -84,6 +84,9 @@
 
         <activity android:name=".biz.huobi.view.BollBackTestAty"
             android:label="火币boll线策略回测"/>
+
+        <activity android:name=".biz.huobi.view.MACDBackTestAty"
+                  android:label="火币MACD线策略回测"/>
     </application>
 
 </manifest>

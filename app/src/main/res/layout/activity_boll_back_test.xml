@@ -7,7 +7,13 @@
         android:id="@+id/line_chart"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="5"/>
+
+    <lecho.lib.hellocharts.view.LineChartView
+        android:id="@+id/line_chart_std"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"/>
 
     <ScrollView
         android:layout_width="match_parent"

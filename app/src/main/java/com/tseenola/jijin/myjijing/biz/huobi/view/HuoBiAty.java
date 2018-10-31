@@ -16,12 +16,9 @@ import com.tseenola.jijin.myjijing.R;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
 
-import java.util.ArrayList;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import lecho.lib.hellocharts.model.PointValue;
 
 /**
  * Created by lenovo on 2018/10/13.
@@ -35,14 +32,12 @@ public class HuoBiAty extends BaseAty {
     Button btShowKLine;
     @Bind(R.id.bt_KLineBollBackTest)
     Button btKLineBollBackTest;
+    @Bind(R.id.bt_MACDBackTest)
+    Button mBtMACDBackTest;
     private String dmain = "https://api.huobi.br.com";
-    private String kLineUrl = "/market/history/kline?symbol=htusdt&period=1day&size=2000";
+    private String kLineUrl = "/market/history/kline?symbol=htusdt&period=15min&size=500";
     private HistoryKLine mHistoryKLine;
 
-    private ArrayList<PointValue> mPointValues_Y;
-    private ArrayList<PointValue> mPointValues_Y_Avg;
-    private ArrayList<PointValue> mPointValues_Y_BollUp;//布林线上轨
-    private ArrayList<PointValue> mPointValues_Y_BollLow;//布林线下轨
 
     @Override
     public void initData() {
@@ -70,7 +65,7 @@ public class HuoBiAty extends BaseAty {
 
                     @Override
                     public void onSuccess(ResponseInfo<String> pResponseInfo) {
-                        onLoadDatasSucc(null,null);
+                        onLoadDatasSucc(null, null);
                         Gson lGson = new Gson();
                         Log.d("vbvb", "onSuccess: " + pResponseInfo.result);
                         mHistoryKLine = lGson.fromJson(pResponseInfo.result, HistoryKLine.class);
@@ -79,32 +74,36 @@ public class HuoBiAty extends BaseAty {
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
-                        onLoadDataFail(null,null);
+                        onLoadDataFail(null, null);
                         Toast.makeText(HuoBiAty.this, pS, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    @OnClick({R.id.bt_GetKLine, R.id.bt_ShowKLine, R.id.bt_KLineBollBackTest})
+    @OnClick({R.id.bt_GetKLine, R.id.bt_ShowKLine, R.id.bt_KLineBollBackTest,R.id.bt_MACDBackTest})
     public void onViewClicked(View view) {
+        if (view.getId() != R.id.bt_GetKLine && mHistoryKLine == null) {
+            Toast.makeText(this, "请先获取历史K线", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         switch (view.getId()) {
             case R.id.bt_GetKLine:
                 getKLine();
                 break;
             case R.id.bt_ShowKLine:
-                if (mHistoryKLine != null) {
-                    LineAty.launch(HuoBiAty.this, mHistoryKLine);
-                }else {
-                    Toast.makeText(this, "请先获取历史K线", Toast.LENGTH_SHORT).show();
-                }
+                LineAty.launch(HuoBiAty.this, mHistoryKLine);
                 break;
             case R.id.bt_KLineBollBackTest:
-                if (mHistoryKLine != null) {
-                    BollBackTestAty.launch(this,mHistoryKLine);
-                }else {
-                    Toast.makeText(this, "请先获取历史K线", Toast.LENGTH_SHORT).show();
-                }
+                BollBackTestAty.launch(this, mHistoryKLine);
+                break;
+            case R.id.bt_MACDBackTest:
+                MACDBackTestAty.launch(this, mHistoryKLine);
+
+                break;
+            default:
                 break;
         }
     }
+
 }
