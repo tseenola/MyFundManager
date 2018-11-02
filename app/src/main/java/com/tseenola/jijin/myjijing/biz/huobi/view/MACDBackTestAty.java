@@ -162,7 +162,7 @@ public class MACDBackTestAty extends BaseAty {
             if (dif < 0 && dea < 0) {
                 if (dif > dea && preDIF <= preDEA) {//上穿买入
                     if (curStatus == STATUS_NULL) {
-                        mTvInfo.append("买入：" + lI + " close:" + closeVal + "\n");
+                        mTvInfo.append("DEF < 0 买入：" + lI + " close:" + closeVal + "\n");
                         curStatus = STATUS_HOLD;
                         curHoldVal = closeVal;
                     }
@@ -170,18 +170,26 @@ public class MACDBackTestAty extends BaseAty {
                     if (curStatus == STATUS_HOLD){
                         double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                         shouYiRateSum += curShouYiRate;
-                        mTvInfo.append("卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
+                        mTvInfo.append("DIF < 0卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
                         curStatus = STATUS_NULL;
                     }
                 }
-            } /*else if (dif >= 0) {
-                if (curStatus == STATUS_HOLD) {
+            } else if (dif >= 0) {
+                if (dif < dea && preDIF >= preDEA){//下穿卖出
+                    if (curStatus == STATUS_HOLD){
+                        double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                        shouYiRateSum += curShouYiRate;
+                        mTvInfo.append("DIF > 0 卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
+                        curStatus = STATUS_NULL;
+                    }
+                }
+                /*if (curStatus == STATUS_HOLD) {
                     double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                     shouYiRateSum += curShouYiRate;
                     mTvInfo.append("卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
                     curStatus = STATUS_NULL;
-                }
-            }*/
+                }*/
+            }
             preDIF = dif;
             preDEA = dea;
         }

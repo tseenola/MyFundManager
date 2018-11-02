@@ -35,7 +35,7 @@ public class HuoBiAty extends BaseAty {
     @Bind(R.id.bt_MACDBackTest)
     Button mBtMACDBackTest;
     private String dmain = "https://api.huobi.br.com";
-    private String kLineUrl = "/market/history/kline?symbol=htusdt&period=15min&size=500";
+    private String kLineUrl = "/market/history/kline?symbol=htusdt&period=1day&size=500";
     private HistoryKLine mHistoryKLine;
 
 
