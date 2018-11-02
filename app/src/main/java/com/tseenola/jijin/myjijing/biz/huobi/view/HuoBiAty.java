@@ -1,8 +1,10 @@
 package com.tseenola.jijin.myjijing.biz.huobi.view;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -34,8 +36,12 @@ public class HuoBiAty extends BaseAty {
     Button btKLineBollBackTest;
     @Bind(R.id.bt_MACDBackTest)
     Button mBtMACDBackTest;
+    @Bind(R.id.et_CoinType)
+    EditText etCoinType;
+    @Bind(R.id.et_Time)
+    EditText etTime;
     private String dmain = "https://api.huobi.br.com";
-    private String kLineUrl = "/market/history/kline?symbol=htusdt&period=1day&size=500";
+    private String kLineUrl = "/market/history/kline?symbol=%s&period=%s&size=2000";
     private HistoryKLine mHistoryKLine;
 
 
@@ -56,8 +62,15 @@ public class HuoBiAty extends BaseAty {
     }
 
     private void getKLine() {
+        String conType = etCoinType.getText().toString().trim();
+        String time = etTime.getText().toString().trim();
+
+        if (TextUtils.isEmpty(conType) || TextUtils.isEmpty(time)) {
+            Toast.makeText(this, "时间或者币种不能为空", Toast.LENGTH_SHORT).show();
+            return;
+        }
         onStart("连接服务器");
-        String url = dmain + kLineUrl;
+        String url = dmain + String.format(kLineUrl,conType,time);
         HttpUtils lHttpUtils = new HttpUtils();
         lHttpUtils.send(HttpRequest.HttpMethod.GET,
                 url,
@@ -105,5 +118,4 @@ public class HuoBiAty extends BaseAty {
                 break;
         }
     }
-
 }

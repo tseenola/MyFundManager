@@ -2,6 +2,7 @@ package com.tseenola.jijin.myjijing.biz.huobi.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -30,20 +31,15 @@ public class BollBackTestAty extends LineAty {
 
     private static final int STATUS_NULL = 0;//非持有状态
     private static final int STATUS_HOLD = 1;//持有状态
+    @Bind(R.id.bt_RunBoll2BackTest)
+    Button btRunBoll2BackTest;
+
     @Override
     public void initView() {
         setContentView(R.layout.activity_boll_back_test);
         ButterKnife.bind(this);
     }
 
-    @OnClick(R.id.bt_RunBackTest)
-    public void onViewClicked() {
-
-        bollStdStrategy();
-
-
-
-    }
 
     /**
      * boll线策略2.---买入投机，卖出稳健型
@@ -52,6 +48,7 @@ public class BollBackTestAty extends LineAty {
      * 3.持有状态下-收盘价从下穿过中轨，卖出。
      */
     private void bollStdStrategy2() {
+        tvInfo.setText("");
         double preCloseVal = 0d;
         double preBollDownVal = 0d;
         double preAvgVal = 0d;
@@ -69,26 +66,26 @@ public class BollBackTestAty extends LineAty {
                 preAvgVal = avgVal;
             }
 
-            if (closeVal > bollDownVal && preCloseVal < preBollDownVal && curStatus ==STATUS_NULL) {//1.收盘价从下穿过下轨
-                tvInfo.append("买入："+i +" close:"+closeVal + "\n");
+            if (closeVal > bollDownVal && preCloseVal < bollDownVal && curStatus == STATUS_NULL) {//1.收盘价从下穿过下轨
+                tvInfo.append("买入：" + i + " close:" + closeVal + "\n");
                 curStatus = STATUS_HOLD;
                 curHoldVal = closeVal;
             } else if(closeVal < bollDownVal && preCloseVal > preBollDownVal && curStatus == STATUS_HOLD){//持有状态下-收盘价从上穿过下轨道，卖出（防止继续跌）
                 double curShouYiRate = (closeVal-curHoldVal)/curHoldVal;
                 shouYiRateSum += curShouYiRate;
-                tvInfo.append("卖出："+i + " close:"+closeVal + "收益率："+curShouYiRate * 100 + "%\n");
+                tvInfo.append("卖出：" + i + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
                 curStatus = STATUS_NULL;
             }else if (closeVal > avgVal && preCloseVal < preAvgVal && curStatus == STATUS_HOLD) {//3.收盘价从下穿过中轨，卖出
                 double curShouYiRate = (closeVal-curHoldVal)/curHoldVal;
                 shouYiRateSum += curShouYiRate;
-                tvInfo.append("卖出："+i + " close:"+closeVal + "收益率："+curShouYiRate * 100 + "%\n");
+                tvInfo.append("卖出：" + i + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
                 curStatus = STATUS_NULL;
             }
             preCloseVal = closeVal;
             preBollDownVal = bollDownVal;
             preAvgVal = avgVal;
         }
-        tvInfo.append("收益率："+shouYiRateSum * 100 +"%\n");
+        tvInfo.append("总收益率：" + shouYiRateSum * 100 + "%\n");
     }
 
     /**
@@ -97,6 +94,7 @@ public class BollBackTestAty extends LineAty {
      * 2.收盘价从上穿过中轨，卖出
      */
     private void bollStdStrategy() {
+        tvInfo.setText("");
         double preCloseVal = 0d;
         int curStatus = STATUS_NULL;
         double shouYiRateSum = 0;//收益率
@@ -109,23 +107,35 @@ public class BollBackTestAty extends LineAty {
                 preCloseVal = closeVal;
             }
 
-            if (closeVal > bollUpVal && preCloseVal < closeVal && curStatus ==STATUS_NULL) {//1.收盘价从下穿过上轨
-                tvInfo.append("买入："+i +" close:"+closeVal + "\n");
+            if (closeVal > bollUpVal && preCloseVal < closeVal && curStatus == STATUS_NULL) {//1.收盘价从下穿过上轨
+                tvInfo.append("买入：" + i + " close:" + closeVal + "\n");
                 curStatus = STATUS_HOLD;
                 curHoldVal = closeVal;
             } else if (closeVal < avgVal && preCloseVal > closeVal && curStatus == STATUS_HOLD) {//2.收盘价从上穿过中轨
-                double curShouYiRate = (closeVal-curHoldVal)/curHoldVal;
+                double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                 shouYiRateSum += curShouYiRate;
-                tvInfo.append("卖出："+i + " close:"+closeVal + "收益率："+curShouYiRate * 100 + "%\n");
+                tvInfo.append("卖出：" + i + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
                 curStatus = STATUS_NULL;
             }
             preCloseVal = closeVal;
         }
-        tvInfo.append("收益率："+shouYiRateSum * 100 +"%\n");
+        tvInfo.append("收益率：" + shouYiRateSum * 100 + "%\n");
     }
 
-    public static void launch (Context pContext, HistoryKLine pHistoryKLine){
-        pContext.startActivity(new Intent(pContext,BollBackTestAty.class));
+    public static void launch(Context pContext, HistoryKLine pHistoryKLine) {
+        pContext.startActivity(new Intent(pContext, BollBackTestAty.class));
         mHistoryKLine = pHistoryKLine;
+    }
+
+    @OnClick({R.id.bt_RunBackTest, R.id.bt_RunBoll2BackTest})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.bt_RunBackTest:
+                bollStdStrategy();
+                break;
+            case R.id.bt_RunBoll2BackTest:
+                bollStdStrategy2();
+                break;
+        }
     }
 }

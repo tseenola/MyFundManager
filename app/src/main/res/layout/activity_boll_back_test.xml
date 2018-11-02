@@ -29,7 +29,13 @@
 
     <Button
         android:id="@+id/bt_RunBackTest"
-        android:text="分析"
+        android:text="买入稳健，卖出稳健型"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/bt_RunBoll2BackTest"
+        android:text="买入投机，卖出稳健型"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
