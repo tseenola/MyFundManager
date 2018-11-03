@@ -3,6 +3,7 @@ package com.tseenola.jijin.myjijing.biz.huobi.view;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -45,6 +46,10 @@ public class MACDBackTestAty extends BaseAty {
     TextView mTvInfo;
     @Bind(R.id.bt_RunBackTest)
     Button mBtRunBackTest;
+
+    @Bind(R.id.bt_RunBoll2BackTest)
+    Button btRunBoll2BackTest;
+
     @Bind(R.id.line_chart_std)
     LineChartView mLineChartStd;
     private ArrayList<PointValue> mPointValues_Y;
@@ -132,10 +137,21 @@ public class MACDBackTestAty extends BaseAty {
 
     }
 
-    @OnClick(R.id.bt_RunBackTest)
-    public void onViewClicked() {
-        macdStrategy();
+    @OnClick({R.id.bt_RunBackTest, R.id.bt_RunBoll2BackTest})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.bt_RunBackTest:
+                macdStrategy();
+                break;
+            case R.id.bt_RunBoll2BackTest:
+                macdStrategy2();
+                break;
+            default:
+                break;
+        }
     }
+
+
 
     /**
      * 新策略：
@@ -145,6 +161,7 @@ public class MACDBackTestAty extends BaseAty {
      *
      */
     private void macdStrategy() {
+        mTvInfo.setText("");
         double preDIF = 0d;
         double preDEA = 0d;
         int curStatus = STATUS_NULL;
@@ -192,6 +209,54 @@ public class MACDBackTestAty extends BaseAty {
             }
             preDIF = dif;
             preDEA = dea;
+        }
+        mTvInfo.append("总收益率：" + shouYiRateSum * 100 + "%\n");
+    }
+
+
+    /**
+     * 新策略：
+     * 当MACD DIF 和 DIA 在0轴以下，并且DIF 上穿过 DIA时候买入(MACD 大于0)。
+     * 当MACD 小于买入后macd 最大值卖出。
+     */
+    private void macdStrategy2() {
+        mTvInfo.setText("");
+        int curStatus = STATUS_NULL;
+        double shouYiRateSum = 0;//收益率
+        double curHoldVal = 0d;//当前持有价格
+        double curMaxMACD = 0d;//买入后最大macd值
+        for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
+            double closeVal = mPointValues_Y.get(lI).getY();
+            double macd = mPointValues_Y_MACD.get(lI).getY();
+
+            if (macd > 0) {//上穿买入
+                if (curStatus == STATUS_NULL) {
+                    Log.d("vbvb", lI+" :macdStrategy2: macd 大于0 且 未买入 ：closeVal:"+ closeVal+"==》买入");
+                    mTvInfo.append("DEF < 0 买入：" + lI + " close:" + closeVal + "\n");
+                    curStatus = STATUS_HOLD;
+                    curHoldVal = closeVal;
+                    curMaxMACD = macd;
+                }else if (curStatus == STATUS_HOLD){//
+                    if (curMaxMACD<=macd){
+                        curMaxMACD = macd;
+                        Log.d("vbvb", lI+" :macdStrategy2: 买入后macd 还在继续增加，继续持有");
+                    }else {//macd小于买入后macd最大值。卖出
+                        double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                        shouYiRateSum += curShouYiRate;
+                        mTvInfo.append("DIF < 0卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
+                        curStatus = STATUS_NULL;
+                        Log.d("vbvb", lI+" :macdStrategy2: 买入后macd 缩小，closeVal"+ closeVal +"==》卖出");
+                    }
+                }
+            }else{//下穿卖出
+                if (curStatus == STATUS_HOLD){
+                    double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                    shouYiRateSum += curShouYiRate;
+                    mTvInfo.append("DIF < 0卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
+                    curStatus = STATUS_NULL;
+                    Log.d("vbvb", lI+" :macdStrategy2: 买入后macd 小于0，==》卖出");
+                }
+            }
         }
         mTvInfo.append("总收益率：" + shouYiRateSum * 100 + "%\n");
     }

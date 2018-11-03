@@ -136,6 +136,8 @@ public class BollBackTestAty extends LineAty {
             case R.id.bt_RunBoll2BackTest:
                 bollStdStrategy2();
                 break;
+                default:
+                    break;
         }
     }
 }
