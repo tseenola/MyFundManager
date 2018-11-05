@@ -216,8 +216,9 @@ public class MACDBackTestAty extends BaseAty {
 
     /**
      * 新策略：
-     * 当MACD DIF 和 DIA 在0轴以下，并且DIF 上穿过 DIA时候买入(MACD 大于0)。
-     * 当MACD 小于买入后macd 最大值卖出。
+     * 当MACD 大于0 并且 macd在上涨买入。
+     * 如果macd 》= 持有macd 平均值，继续持有，否则卖出
+     * 当MACD 小于买入后macd 平均值 卖出 或者 macd 小于0 卖出。
      */
     private void macdStrategy2() {
         mTvInfo.setText("");
@@ -225,27 +226,47 @@ public class MACDBackTestAty extends BaseAty {
         double shouYiRateSum = 0;//收益率
         double curHoldVal = 0d;//当前持有价格
         double curMaxMACD = 0d;//买入后最大macd值
+        double curHoldMACDAvg = 0d;//买入后macd平均值
+        int holdDay = 0;//持有天数
+        double curHoldMACDSum = 0d;
         for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
             double closeVal = mPointValues_Y.get(lI).getY();
             double macd = mPointValues_Y_MACD.get(lI).getY();
 
-            if (macd > 0) {//上穿买入
+            if (macd > 0 ) {//上穿买入
                 if (curStatus == STATUS_NULL) {
-                    Log.d("vbvb", lI+" :macdStrategy2: macd 大于0 且 未买入 ：closeVal:"+ closeVal+"==》买入");
-                    mTvInfo.append("DEF < 0 买入：" + lI + " close:" + closeVal + "\n");
-                    curStatus = STATUS_HOLD;
-                    curHoldVal = closeVal;
-                    curMaxMACD = macd;
-                }else if (curStatus == STATUS_HOLD){//
-                    if (curMaxMACD<=macd){
+                    double preMACD = 0d;
+                    if (lI>0) {
+                        preMACD = mPointValues_Y_MACD.get(lI-1).getY();
+                    }else {
+                        preMACD = macd;
+                    }
+                    if (macd > preMACD){//如果macd 是上涨状态就买入
+                        mTvInfo.append("MACD > 0 买入：" + lI + " close:" + closeVal + "\n");
+                        curStatus = STATUS_HOLD;
+                        curHoldVal = closeVal;
                         curMaxMACD = macd;
-                        Log.d("vbvb", lI+" :macdStrategy2: 买入后macd 还在继续增加，继续持有");
-                    }else {//macd小于买入后macd最大值。卖出
-                        double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
-                        shouYiRateSum += curShouYiRate;
-                        mTvInfo.append("DIF < 0卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
-                        curStatus = STATUS_NULL;
-                        Log.d("vbvb", lI+" :macdStrategy2: 买入后macd 缩小，closeVal"+ closeVal +"==》卖出");
+                        curHoldMACDAvg = macd;
+                        holdDay = 1;
+                        curHoldMACDSum = macd;
+                        Log.d("vbvb", lI+" ,macd:"+macd+"大于0,持有后macd平均值:"+curHoldMACDAvg+ ",持有天数："+holdDay+ " ,closeVal:"+closeVal+" ========>买入");
+                    }
+                }else if (curStatus == STATUS_HOLD){//
+                    holdDay ++;
+                    curHoldMACDSum += macd;
+                    curHoldMACDAvg = curHoldMACDSum/holdDay;
+                    if (macd>=curHoldMACDAvg){
+                        //继续持有
+                        Log.d("vbvb", lI+" ,macd:"+macd+" >= 持有后macd平均值:"+curHoldMACDAvg+ " ,持有天数："+holdDay+ " ,closeVal:"+closeVal+" ==>继续持有");
+                    }else {
+                        //卖出
+                        if (curStatus == STATUS_HOLD) {
+                            double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                            shouYiRateSum += curShouYiRate;
+                            mTvInfo.append("macd < macd avg卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
+                            curStatus = STATUS_NULL;
+                            Log.d("vbvb", lI+" ,macd:"+macd+" < 持有后macd平均值:"+curHoldMACDAvg+ " ,持有天数："+holdDay+ " ,closeVal:"+closeVal+ " ,收益率："+curShouYiRate*100+" %========>卖出");
+                        }
                     }
                 }
             }else{//下穿卖出
@@ -254,7 +275,8 @@ public class MACDBackTestAty extends BaseAty {
                     shouYiRateSum += curShouYiRate;
                     mTvInfo.append("DIF < 0卖出：" + lI + " close:" + closeVal + "收益率：" + curShouYiRate * 100 + "%\n");
                     curStatus = STATUS_NULL;
-                    Log.d("vbvb", lI+" :macdStrategy2: 买入后macd 小于0，==》卖出");
+                    Log.d("vbvb", lI+" ,macd:"+macd+" < 0 ,持有天数："+holdDay+ " ,closeVal:"+closeVal+" ,收益率："+curShouYiRate*100+" %========>卖出");
+
                 }
             }
         }
