@@ -1,5 +1,6 @@
 package com.tseenola.jijin.myjijing;
 
+import android.net.Uri;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
@@ -7,18 +8,12 @@ import com.google.gson.Gson;
 import com.tseenola.jijin.myjijing.biz.fundhistory.model.FundInfo;
 import com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
-import com.tseenola.jijin.myjijing.utils.DateUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.litepal.crud.DataSupport;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
-import static android.R.id.list;
-import static java.util.Collections.min;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -80,4 +75,10 @@ public class ExampleInstrumentedTest {
 
     }
 
+    @Test
+    public void testGetAccountId(){
+        String data = "4F65x5A2bLyMWVQj3Aqp+B4w+ivaA7n5Oi2SuYtCJ9o=";
+        String s = Uri.encode(data);
+        int i = 0;
+    }
 }
