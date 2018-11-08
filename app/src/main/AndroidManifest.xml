@@ -87,6 +87,8 @@
 
         <activity android:name=".biz.huobi.view.MACDBackTestAty"
                   android:label="火币MACD线策略回测"/>
+
+        <service android:name=".service.MacdBgService" />
     </application>
 
 </manifest>

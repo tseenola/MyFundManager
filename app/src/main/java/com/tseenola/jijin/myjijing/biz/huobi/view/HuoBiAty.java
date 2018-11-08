@@ -1,5 +1,6 @@
 package com.tseenola.jijin.myjijing.biz.huobi.view;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.tseenola.jijin.myjijing.LineAty;
 import com.tseenola.jijin.myjijing.R;
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
+import com.tseenola.jijin.myjijing.service.MacdBgService;
 import com.tseenola.jijin.myjijing.utils.ApiSignature;
 import com.tseenola.jijin.myjijing.utils.KeyUtils;
 import com.tseenola.jijin.myjijing.utils.TimeUtils;
@@ -124,7 +126,8 @@ public class HuoBiAty extends BaseAty {
                 MACDBackTestAty.launch(this, mHistoryKLine);
                 break;
             case R.id.bt_StartMacdService:
-                getAcountId2();
+                //getAcountId2();
+                startService(new Intent(this,MacdBgService.class));
                 break;
             default:
                 break;
