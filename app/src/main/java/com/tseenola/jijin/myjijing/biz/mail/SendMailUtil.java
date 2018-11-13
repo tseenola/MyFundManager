@@ -13,7 +13,7 @@ public class SendMailUtil {
     private static final String HOST = "smtp.qq.com";
     private static final String PORT = "587";
     private static final String FROM_ADD = "641380205@qq.com"; //发送方邮箱
-    private static final String FROM_PSW = "1314520@jun$";//发送方邮箱授权码
+    private static final String FROM_PSW = "everythingbeok$";//发送方邮箱授权码
 
 //    //163
 //    private static final String HOST = "smtp.163.com";
@@ -22,8 +22,8 @@ public class SendMailUtil {
 //    private static final String FROM_PSW = "teprinciple163";
 ////    private static final String TO_ADD = "2584770373@qq.com";
 
-    public static void send(final File file,String toAdd){
-        final MailInfo mailInfo = creatMail(toAdd);
+    public static void send(final File file,String toAdd,String pTheme,String pBody){
+        final MailInfo mailInfo = creatMail(toAdd,pTheme,pBody);
         final MailSender sms = new MailSender();
         new Thread(new Runnable() {
             @Override
@@ -33,8 +33,8 @@ public class SendMailUtil {
         }).start();
     }
 
-    public static void send(String toAdd){
-        final MailInfo mailInfo = creatMail(toAdd);
+    public static void send(String toAdd,String pTheme,String pBody){
+        final MailInfo mailInfo = creatMail(toAdd,pTheme,pBody);
         final MailSender sms = new MailSender();
         new Thread(new Runnable() {
             @Override
@@ -45,7 +45,7 @@ public class SendMailUtil {
     }
 
     @NonNull
-    private static MailInfo creatMail(String toAdd) {
+    private static MailInfo creatMail(String toAdd,String pTheme,String pBody) {
         final MailInfo mailInfo = new MailInfo();
         mailInfo.setMailServerHost(HOST);
         mailInfo.setMailServerPort(PORT);
@@ -54,8 +54,8 @@ public class SendMailUtil {
         mailInfo.setPassword(FROM_PSW);// 您的邮箱密码
         mailInfo.setFromAddress(FROM_ADD); // 发送的邮箱
         mailInfo.setToAddress(toAdd); // 发到哪个邮件去
-        mailInfo.setSubject("Hello"); // 邮件主题
-        mailInfo.setContent("Android 测试"); // 邮件文本
+        mailInfo.setSubject(pTheme); // 邮件主题
+        mailInfo.setContent(pBody); // 邮件文本
         return mailInfo;
     }
 }

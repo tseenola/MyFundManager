@@ -1,6 +1,5 @@
 package com.tseenola.jijin.myjijing;
 
-import android.net.Uri;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
@@ -13,7 +12,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.litepal.crud.DataSupport;
 
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -77,8 +83,21 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void testGetAccountId(){
-        String data = "4F65x5A2bLyMWVQj3Aqp+B4w+ivaA7n5Oi2SuYtCJ9o=";
-        String s = Uri.encode(data);
+        String appSecretKey = "5cb99be0-b3387cx9-0ce79aa7-xxxxx";
+        String payload = "GET\nbe.huobi.com\n/v1/account/accounts\nAccessKeyId=a1a17ddf-466fde2x-db04b9aa-xxxxx&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-06-02T06%3A13%3A49";
+        Mac hmacSha256 = null;
+        try {
+            hmacSha256 = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secKey =
+                    new SecretKeySpec(appSecretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            hmacSha256.init(secKey);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("No such algorithm: " + e.getMessage());
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid key: " + e.getMessage());
+        }
+        byte[] hash = hmacSha256.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+        String actualSign = Base64.getEncoder().encodeToString(hash);
         int i = 0;
     }
 }

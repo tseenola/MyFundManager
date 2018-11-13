@@ -1,31 +1,15 @@
 package com.tseenola.jijin.myjijing.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 /**
  * Created by lenovo on 2018/11/6.
  * 描述：
  */
-public class ApiSignature {
+/*public class ApiSignature {
 
     static final DateTimeFormatter DT_FORMAT = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss");
     static final ZoneId ZONE_GMT = ZoneId.of("Z");
 
-    /**
+    *//**
      * 创建一个有效的签名。该方法为客户端调用，将在传入的params中添加AccessKeyId、Timestamp、SignatureVersion、SignatureMethod、Signature参数。
      *
      * @param appKey       AppKeyId.
@@ -34,7 +18,7 @@ public class ApiSignature {
      * @param host         请求域名，例如"be.huobi.com"
      * @param uri          请求路径，注意不含?以及后的参数，例如"/v1/api/info"
      * @param params       原始请求参数，以Key-Value存储，注意Value不要编码
-     */
+     *//*
     public void createSignature(String appKey, String appSecretKey, String method, String host,
                                 String uri, Map<String, String> params) {
         StringBuilder sb = new StringBuilder(1024);
@@ -74,12 +58,12 @@ public class ApiSignature {
     }
 
 
-    /**
+    *//**
      * 使用标准URL Encode编码。注意和JDK默认的不同，空格被编码为%20而不是+。
      *
      * @param s String字符串
      * @return URL编码后的字符串
-     */
+     *//*
     public static String urlEncode(String s) {
         try {
             return URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20");
@@ -88,9 +72,9 @@ public class ApiSignature {
         }
     }
 
-    /**
+    *//**
      * Return epoch seconds
-     */
+     *//*
     long epochNow() {
         return Instant.now().getEpochSecond();
     }
@@ -98,4 +82,4 @@ public class ApiSignature {
     String gmtNow() {
         return Instant.ofEpochSecond(epochNow()).atZone(ZONE_GMT).format(DT_FORMAT);
     }
-}
+}*/

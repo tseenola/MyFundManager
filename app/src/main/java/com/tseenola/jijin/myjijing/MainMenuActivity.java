@@ -3,10 +3,8 @@ package com.tseenola.jijin.myjijing;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.tseenola.jijin.myjijing.biz.fundhistory.view.FundHistoryAty;
 import com.tseenola.jijin.myjijing.biz.fundlist.view.FundListAty;
@@ -54,13 +52,7 @@ public class MainMenuActivity extends Activity {
                 startActivity(new Intent(this, FundHistoryAty.class));
                 break;
             case R.id.bt_Setting:
-                try {
-                    SendMailUtil.send("641380205@qq.com");
-                } catch (Exception pE) {
-                    Log.d("vbvb", "onClick: 发送邮件失败");
-                    pE.printStackTrace();
-                    Toast.makeText(this, "发送邮件失败", Toast.LENGTH_SHORT).show();
-                }
+                SendMailUtil.send("641380205@qq.com","日常播报","总收益率：");
                 break;
             case R.id.bt_FundStrategy:
                 startActivity(new Intent(this, FundStrategyAty.class));

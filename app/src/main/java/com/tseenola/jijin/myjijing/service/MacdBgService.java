@@ -14,11 +14,14 @@ import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
 import com.tseenola.jijin.myjijing.biz.huobi.model.MACDUtils;
+import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
+import com.tseenola.jijin.myjijing.utils.ThreadUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import lecho.lib.hellocharts.model.PointValue;
 
@@ -31,7 +34,10 @@ public class MacdBgService extends Service {
     private static final int STATUS_HOLD = 1;//持有状态
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
-    private String kLineUrl = "/market/history/kline?symbol=%s&period=%s&size=2000";
+    private String mSymbol = "htusdt";
+    private String mPeriod = "1day";
+    private String mSize = "500";
+    private String kLineUrl = "/market/history/kline?symbol=%s&period=%s&size=%s";
     private HistoryKLine mHistoryKLine;
     private List<PointValue> mPointValues_Y;
     private List<PointValue> mPointValues_Y_MACD;
@@ -48,8 +54,17 @@ public class MacdBgService extends Service {
     public void onCreate() {
         super.onCreate();
         //抓取数据
-        getData();
+        getDataAndAnlyse();
+        Log.d("vbvb", "onCreate: 线程：onCreate"+Thread.currentThread().getId());
+    }
 
+    private void getDataAndAnlyse() {
+        ThreadUtil.runSingleScheduledService(new Runnable() {
+            @Override
+            public void run() {
+                getData();
+            }
+        },0,1,TimeUnit.HOURS);
     }
 
     private void analyseData() {
@@ -59,6 +74,7 @@ public class MacdBgService extends Service {
         double curHoldMACDAvg = 0d;//买入后macd平均值
         int holdDay = 0;//持有天数
         double curHoldMACDSum = 0d;
+        StringBuilder lBuySaleBuilder = new StringBuilder("火币：Symbol:"+mSymbol+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
         for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
             double closeVal = mPointValues_Y.get(lI).getY();
             double macd = mPointValues_Y_MACD.get(lI).getY();
@@ -77,22 +93,35 @@ public class MacdBgService extends Service {
                         curHoldMACDAvg = macd;
                         holdDay = 1;
                         curHoldMACDSum = macd;
-                        Log.d("vbvb", lI+" ,macd:"+macd+"大于0,持有后macd平均值:"+curHoldMACDAvg+ ",持有天数："+holdDay+ " ,closeVal:"+closeVal+" ========>买入");
+                        String msg = "\n\n"+(lI+1)+" ,macd:"+String.format("%.5f",macd)+" >0, 持有后macd平均值:" +String.format("%.5f",curHoldMACDAvg)+ ",持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ====================>买入\n";
+                        lBuySaleBuilder.append(msg);
+                        Log.d("vbvb", msg);
+                        //如果买入信号是最后进一条数据那么说明是今天，就发送邮件通知
+                        if (lI==mPointValues_Y_MACD.size()-1){
+                            SendMailUtil.send("641380205@qq.com","火币-买入",msg);
+                        }
                     }
-                }else if (curStatus == STATUS_HOLD){//
+                }else if (curStatus == STATUS_HOLD){
                     holdDay ++;
                     curHoldMACDSum += macd;
                     curHoldMACDAvg = curHoldMACDSum/holdDay;
                     if (macd>=curHoldMACDAvg){
                         //继续持有
-                        Log.d("vbvb", lI+" ,macd:"+macd+" >= 持有后macd平均值:"+curHoldMACDAvg+ " ,持有天数："+holdDay+ " ,closeVal:"+closeVal+" ==>继续持有");
+                        String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" >= 持有后macd平均值:"+String.format("%.5f",curHoldMACDAvg)+" ,持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ==>继续持有\n";
+                        Log.d("vbvb", msg);
+                        lBuySaleBuilder.append(msg);
                     }else {
                         //卖出
                         if (curStatus == STATUS_HOLD) {
                             double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                             shouYiRateSum += curShouYiRate;
                             curStatus = STATUS_NULL;
-                            Log.d("vbvb", lI+" ,macd:"+macd+" < 持有后macd平均值:"+curHoldMACDAvg+ " ,持有天数："+holdDay+ " ,closeVal:"+closeVal+ " ,收益率："+curShouYiRate*100+" %========>卖出");
+                            String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" < 持有后macd平均值:"+String.format("%.5f",curHoldMACDAvg)+" ,持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ,收益率："+String.format("%.5f",curShouYiRate*100)+" %========>卖出\n";
+                            Log.d("vbvb", msg);
+                            if (lI==mPointValues_Y_MACD.size()-1){
+                                SendMailUtil.send("641380205@qq.com","火币-卖出",msg);
+                            }
+                            lBuySaleBuilder.append(msg);
                         }
                     }
                 }
@@ -101,11 +130,25 @@ public class MacdBgService extends Service {
                     double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                     shouYiRateSum += curShouYiRate;
                     curStatus = STATUS_NULL;
-                    Log.d("vbvb", lI+" ,macd:"+macd+" < 0 ,持有天数："+holdDay+ " ,closeVal:"+closeVal+" ,收益率："+curShouYiRate*100+" %========>卖出");
+                    String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" < 0 ,持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ,收益率："+String.format("%.5f",curShouYiRate*100)+" %========>卖出\n";
+                    Log.d("vbvb", msg);
+                    if (lI==mPointValues_Y_MACD.size()-1){
+                        SendMailUtil.send("641380205@qq.com","火币-卖出",msg);
+                    }
+                    lBuySaleBuilder.append(msg);
                 }
             }
         }
-        Log.d("vbvb", "总收益率：" + shouYiRateSum * 100 + "%\n");
+        String msg = "\n\n总收益率：" + String.format("%.2f",shouYiRateSum * 100) + "%";
+        Log.d("vbvb", msg);
+        if (curStatus==STATUS_HOLD){
+            msg = msg+",当前状态持有中\n";
+            lBuySaleBuilder.append(msg);
+        }else {
+            msg = msg+",当前状态非持有\n";
+            lBuySaleBuilder.append(msg);
+        }
+        SendMailUtil.send("641380205@qq.com","火币-日常播报",lBuySaleBuilder.toString());
     }
 
     private void parseData() {
@@ -137,7 +180,8 @@ public class MacdBgService extends Service {
      * 抓取数据
      */
     private void getData(){
-        String url = dmain + String.format(kLineUrl, "btcusdt", "1day");
+        Log.d("vbvb", "getData: 进行请求了");
+        String url = dmain + String.format(kLineUrl, mSymbol, mPeriod,mSize);
         HttpUtils lHttpUtils = new HttpUtils();
         lHttpUtils.send(HttpRequest.HttpMethod.GET,
                 url,
@@ -148,19 +192,23 @@ public class MacdBgService extends Service {
                         //给出结论或者进行通知
                         Gson lGson = new Gson();
                         Log.d("vbvb", "onSuccess: " + pResponseInfo.result);
-                        mHistoryKLine = lGson.fromJson(pResponseInfo.result, HistoryKLine.class);
-
-                        //处理数据
-                        parseData();
-                        //分析数据
-                        analyseData();
-
-
+                        if (pResponseInfo.result.contains("\"status\":\"ok\"")){
+                            mHistoryKLine = lGson.fromJson(pResponseInfo.result, HistoryKLine.class);
+                            //处理数据
+                            parseData();
+                            //分析数据
+                            analyseData();
+                            //得出结论
+                        }else {
+                            SendMailUtil.send("641380205@qq.com","火币-抓取出错",pResponseInfo.result);
+                        }
                     }
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
+                        SendMailUtil.send("641380205@qq.com","火币-抓取出错",pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
+                        getData();
                     }
                 });
     }
