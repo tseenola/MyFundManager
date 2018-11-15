@@ -34,6 +34,7 @@ public class MacdBgService extends Service {
     private static final int STATUS_HOLD = 1;//持有状态
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
+    private String [] mSymbols = {"btcusdt","ethusdt","htusdt","eosusdt"};
     private String mSymbol = "htusdt";
     private String mPeriod = "1day";
     private String mSize = "500";
@@ -43,7 +44,7 @@ public class MacdBgService extends Service {
     private List<PointValue> mPointValues_Y_MACD;
     private List<PointValue> mPointValues_Y_DIF;
     private List<PointValue> mPointValues_Y_DEA;
-
+    private int mCurSymbo = 0;
     @Nullable
     @Override
     public IBinder onBind(Intent pIntent) {
@@ -62,6 +63,7 @@ public class MacdBgService extends Service {
         ThreadUtil.runSingleScheduledService(new Runnable() {
             @Override
             public void run() {
+                mCurSymbo = 0;
                 getData();
             }
         },0,1,TimeUnit.HOURS);
@@ -74,7 +76,7 @@ public class MacdBgService extends Service {
         double curHoldMACDAvg = 0d;//买入后macd平均值
         int holdDay = 0;//持有天数
         double curHoldMACDSum = 0d;
-        StringBuilder lBuySaleBuilder = new StringBuilder("火币：Symbol:"+mSymbol+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
+        StringBuilder lBuySaleBuilder = new StringBuilder("火币：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
         for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
             double closeVal = mPointValues_Y.get(lI).getY();
             double macd = mPointValues_Y_MACD.get(lI).getY();
@@ -180,8 +182,11 @@ public class MacdBgService extends Service {
      * 抓取数据
      */
     private void getData(){
+        if (mCurSymbo>=mSymbols.length){
+            return;
+        }
         Log.d("vbvb", "getData: 进行请求了");
-        String url = dmain + String.format(kLineUrl, mSymbol, mPeriod,mSize);
+        String url = dmain + String.format(kLineUrl, mSymbols[mCurSymbo], mPeriod,mSize);
         HttpUtils lHttpUtils = new HttpUtils();
         lHttpUtils.send(HttpRequest.HttpMethod.GET,
                 url,
@@ -198,18 +203,78 @@ public class MacdBgService extends Service {
                             parseData();
                             //分析数据
                             analyseData();
+                            mCurSymbo++;
                             //得出结论
+                            getData();//获取下一跳数据
                         }else {
-                            SendMailUtil.send("641380205@qq.com","火币-抓取出错",pResponseInfo.result);
+                            SendMailUtil.send("641380205@qq.com","火币-抓取出错",mSymbols[mCurSymbo]+": "+pResponseInfo.result);
+                            getData();//获取下一跳数据
                         }
                     }
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
-                        SendMailUtil.send("641380205@qq.com","火币-抓取出错",pS+"\n"+pE.getMessage());
+                        SendMailUtil.send("641380205@qq.com","火币-抓取出错",mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
                         getData();
                     }
                 });
+    }
+
+    @Override
+    public void onDestroy() {
+        SendMailUtil.send("641380205@qq.com","火币-出错","执行了onDestroy");
+        super.onDestroy();
+    }
+
+    /**
+     * 获取黄金价格
+     */
+    protected void getGoldPrice(){
+        String url = "http://www.sge.com.cn/";
+        HttpUtils lHttpUtils = new HttpUtils();
+        lHttpUtils.send(HttpRequest.HttpMethod.GET,
+                url,
+                new RequestCallBack<String>() {
+
+                    @Override
+                    public void onSuccess(ResponseInfo<String> pResponseInfo) {
+
+                    }
+
+                    @Override
+                    public void onFailure(HttpException pE, String pS) {
+                        SendMailUtil.send("641380205@qq.com","黄金-抓取出错",pS+"\n"+pE.getMessage());
+                        Log.d("vbvb", "onFailure: "+pS);
+                    }
+                });
+    }
+
+    /**
+     * 从html中获取黄金价格
+     * @param htmlData
+     * @return
+     */
+    private double getGoldPrice(String htmlData){
+        try {
+            int startIndex = htmlData.indexOf("<li><p>上海金早盘价（元）");
+            int endIndex = startIndex;
+            while(true){
+                String temp = htmlData.substring(endIndex,endIndex+5);
+                if(temp.equals("</li>")){
+                    break;
+                }
+                endIndex ++ ;
+            }
+            String liData = htmlData.substring(startIndex,endIndex+5);
+            int goldStartIndex = liData.indexOf("\">");
+            int goldEndIndex = liData.indexOf("</span>");
+            String goldPrice = liData.substring(goldStartIndex+2,goldEndIndex);
+            return Double.parseDouble(goldPrice);
+        } catch (Exception e) {
+            SendMailUtil.send("641380205@qq.com","黄金-抓取出错",e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
     }
 }
