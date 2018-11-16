@@ -1,5 +1,8 @@
 package com.tseenola.jijin.myjijing.biz.huobi.view;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
@@ -128,7 +131,18 @@ public class HuoBiAty extends BaseAty {
                 break;
         }
     }
-    /**
+
+    public void startServer(){
+        // 包装需要执行Service的Intent
+        MacdBgService lMacdBgService = new MacdBgService();
+        Intent intent = new Intent(this, MacdBgService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        // 获取AlarmManager系统服务
+        AlarmManager manager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        // 使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
+        manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, 20 * 1000, pendingIntent);
+    }
+  /**
      * https://api.huobi.br.com
      */
 //    private void getAcountId() {

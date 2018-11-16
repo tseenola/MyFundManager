@@ -1,8 +1,11 @@
 package com.tseenola.jijin.myjijing.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -45,6 +48,9 @@ public class MacdBgService extends Service {
     private List<PointValue> mPointValues_Y_DIF;
     private List<PointValue> mPointValues_Y_DEA;
     private int mCurSymbo = 0;
+    private static final double GOLD_PRICE_THRESHOLD = 265;
+    private PowerManager.WakeLock wakeLock;
+
     @Nullable
     @Override
     public IBinder onBind(Intent pIntent) {
@@ -54,6 +60,9 @@ public class MacdBgService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, MacdBgService.class.getName());
+        wakeLock.acquire();
         //抓取数据
         getDataAndAnlyse();
         Log.d("vbvb", "onCreate: 线程：onCreate"+Thread.currentThread().getId());
@@ -63,8 +72,22 @@ public class MacdBgService extends Service {
         ThreadUtil.runSingleScheduledService(new Runnable() {
             @Override
             public void run() {
+                getGoldPrice();//抓取黄金
+            }
+        },0,1,TimeUnit.HOURS);
+
+        ThreadUtil.runSingleScheduledService(new Runnable() {
+            @Override
+            public void run() {
+                SendMailUtil.send("641380205@qq.com","数据抓取-我还活着","心跳");
+            }
+        },0,10,TimeUnit.MINUTES);
+
+        ThreadUtil.runSingleScheduledService(new Runnable() {
+            @Override
+            public void run() {
                 mCurSymbo = 0;
-                getData();
+                getData();//抓取火币
             }
         },0,1,TimeUnit.HOURS);
     }
@@ -208,7 +231,13 @@ public class MacdBgService extends Service {
                             getData();//获取下一跳数据
                         }else {
                             SendMailUtil.send("641380205@qq.com","火币-抓取出错",mSymbols[mCurSymbo]+": "+pResponseInfo.result);
-                            getData();//获取下一跳数据
+                            //1 5分钟以后重新运行
+                            new Handler().postDelayed(new Runnable(){
+                                @Override
+                                public void run() {
+                                    getData();
+                                }
+                            }, 1000* 5);
                         }
                     }
 
@@ -216,7 +245,14 @@ public class MacdBgService extends Service {
                     public void onFailure(HttpException pE, String pS) {
                         SendMailUtil.send("641380205@qq.com","火币-抓取出错",mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
-                        getData();
+
+                        //1 5分钟以后重新运行
+                        new Handler().postDelayed(new Runnable(){
+                            @Override
+                            public void run() {
+                                getData();
+                            }
+                        }, 1000 * 5);
                     }
                 });
     }
@@ -224,6 +260,7 @@ public class MacdBgService extends Service {
     @Override
     public void onDestroy() {
         SendMailUtil.send("641380205@qq.com","火币-出错","执行了onDestroy");
+        if (wakeLock != null) { wakeLock.release(); wakeLock = null; }
         super.onDestroy();
     }
 
@@ -239,13 +276,25 @@ public class MacdBgService extends Service {
 
                     @Override
                     public void onSuccess(ResponseInfo<String> pResponseInfo) {
-
+                        double goldPrice = getGoldPrice(pResponseInfo.result);
+                        if (goldPrice<=GOLD_PRICE_THRESHOLD){
+                            SendMailUtil.send("641380205@qq.com","黄金-价格-买入","今日金价："+goldPrice+"小于阈值建议买入");
+                        }else {
+                            SendMailUtil.send("641380205@qq.com","黄金-价格","今日金价："+goldPrice);
+                        }
                     }
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
                         SendMailUtil.send("641380205@qq.com","黄金-抓取出错",pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
+                        //1 1个小时以后重新运行
+                        new Handler().postDelayed(new Runnable(){
+                            @Override
+                            public void run() {
+                                getGoldPrice();
+                            }
+                        }, 5000);
                     }
                 });
     }
