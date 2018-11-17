@@ -36,7 +36,9 @@ public class MacdBgService extends Service {
     private static final int STATUS_HOLD = 1;//持有状态
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
-    private String [] mSymbols = {"btcusdt"
+    private String [] mSymbols = {
+            "cdcbtc",
+            "btcusdt"
             ,"ethusdt"
             ,"xrpusdt"
             ,"bchusdt"
@@ -599,6 +601,7 @@ public class MacdBgService extends Service {
      */
     private void getData(){
         if (mCurSymbo>=mSymbols.length){
+            SendMailUtil.send("641380205@qq.com","火-循环完成","");
             return;
         }
         Log.d("vbvb", "getData: 进行请求了");
@@ -621,16 +624,19 @@ public class MacdBgService extends Service {
                             analyseData();
                             mCurSymbo++;
                             //得出结论
-                            getData();//获取下一跳数据
                         }else {
                             SendMailUtil.send("641380205@qq.com","火-抓错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pResponseInfo.result);
+                            mCurSymbo++;
                         }
+                        getData();//获取下一跳数据
                     }
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
                         SendMailUtil.send("641380205@qq.com","火-抓取出错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
+                        mCurSymbo++;
+                        getData();//获取下一跳数据
                     }
                 });
     }
