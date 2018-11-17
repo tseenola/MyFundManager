@@ -3,7 +3,6 @@ package com.tseenola.jijin.myjijing.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
@@ -625,13 +624,6 @@ public class MacdBgService extends Service {
                             getData();//获取下一跳数据
                         }else {
                             SendMailUtil.send("641380205@qq.com","火-抓错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pResponseInfo.result);
-                            //1 5分钟以后重新运行
-                            new Handler().postDelayed(new Runnable(){
-                                @Override
-                                public void run() {
-                                    getData();
-                                }
-                            }, 1000* 5);
                         }
                     }
 
@@ -639,14 +631,6 @@ public class MacdBgService extends Service {
                     public void onFailure(HttpException pE, String pS) {
                         SendMailUtil.send("641380205@qq.com","火-抓取出错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
-
-                        //1 5分钟以后重新运行
-                        new Handler().postDelayed(new Runnable(){
-                            @Override
-                            public void run() {
-                                getData();
-                            }
-                        }, 1000 * 5);
                     }
                 });
     }
@@ -682,13 +666,6 @@ public class MacdBgService extends Service {
                     public void onFailure(HttpException pE, String pS) {
                         SendMailUtil.send("641380205@qq.com","黄金-抓错",pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
-                        //1 1个小时以后重新运行
-                        new Handler().postDelayed(new Runnable(){
-                            @Override
-                            public void run() {
-                                getGoldPrice();
-                            }
-                        }, 5000);
                     }
                 });
     }
