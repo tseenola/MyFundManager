@@ -563,12 +563,12 @@ public class MacdBgService extends Service {
         if (curStatus==STATUS_HOLD){
             msg = msg+"当前-持有";
             lBuySaleBuilder.append(msg);
+            msg = msg+",总收：" + String.format("%.1f",shouYiRateSum * 100) + "%\n";
+            SendMailUtil.send("641380205@qq.com","火-播-"+msg,lBuySaleBuilder.toString());
         }else {
             msg = msg+"当前-非持";
             lBuySaleBuilder.append(msg);
         }
-        msg = msg+",总收：" + String.format("%.1f",shouYiRateSum * 100) + "%\n";
-        SendMailUtil.send("641380205@qq.com","火-播-"+msg,lBuySaleBuilder.toString());
     }
 
     private void parseData() {
