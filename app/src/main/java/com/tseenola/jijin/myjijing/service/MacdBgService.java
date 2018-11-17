@@ -37,10 +37,403 @@ public class MacdBgService extends Service {
     private static final int STATUS_HOLD = 1;//持有状态
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
-    private String [] mSymbols = {"btcusdt","ethusdt","htusdt","eosusdt"};
+    private String [] mSymbols = {"btcusdt"
+            ,"ethusdt"
+            ,"xrpusdt"
+            ,"bchusdt"
+            ,"ltcusdt"
+            ,"etcusdt"
+            ,"eosusdt"
+            ,"htusdt"
+            ,"adausdt"
+            ,"dashusdt"
+            ,"omgusdt"
+            ,"zecusdt"
+            ,"iotausdt"
+            ,"xmrusdt"
+            ,"hb10usdt"
+            ,"gxcusdt"
+            ,"hitusdt"
+            ,"btmusdt"
+            ,"paiusdt"
+            ,"hptusdt"
+            ,"elausdt"
+            ,"ontusdt"
+            ,"iostusdt"
+            ,"qtumusdt"
+            ,"trxusdt"
+            ,"dtausdt"
+            ,"zilusdt"
+            ,"ocnusdt"
+            ,"cmtusdt"
+            ,"elfusdt"
+            ,"gntusdt"
+            ,"socusdt"
+            ,"nasusdt"
+            ,"ctxcusdt"
+            ,"ruffusdt"
+            ,"vetusdt"
+            ,"letusdt"
+            ,"wiccusdt"
+            ,"xlmusdt"
+            ,"hcusdt"
+            ,"neousdt"
+            ,"cvcusdt"
+            ,"thetausdt"
+            ,"btsusdt"
+            ,"itcusdt"
+            ,"actusdt"
+            ,"mdsusdt"
+            ,"storjusdt"
+            ,"xemusdt"
+            ,"sntusdt"
+            ,"steemusdt"
+            ,"smtusdt"
+            ,"bixusdt"
+            ,"usdthusd"
+            ,"btchusd"
+            ,"ethhusd"
+            ,"eoshusd"
+            ,"shebtc"
+            ,"dacbtc"
+            ,"utkbtc"
+            ,"sspbtc"
+            ,"lxtbtc"
+            ,"fairbtc"
+            ,"uuubtc"
+            ,"waxbtc"
+            ,"ftibtc"
+            ,"yeebtc"
+            ,"hptbtc"
+            ,"nccbtc"
+            ,"cnnbtc"
+            ,"elabtc"
+            ,"datxbtc"
+            ,"btgbtc"
+            ,"rcccbtc"
+            ,"polybtc"
+            ,"lymbtc"
+            ,"rtebtc"
+            ,"xembtc"
+            ,"kcashbtc"
+            ,"btmbtc"
+            ,"abtbtc"
+            ,"qashbtc"
+            ,"bcdbtc"
+            ,"manabtc"
+            ,"steembtc"
+            ,"mtnbtc"
+            ,"gtcbtc"
+            ,"letbtc"
+            ,"bkbtbtc"
+            ,"ektbtc"
+            ,"kncbtc"
+            ,"aidocbtc"
+            ,"paibtc"
+            ,"dbcbtc"
+            ,"seelebtc"
+            ,"paybtc"
+            ,"bcvbtc"
+            ,"bftbtc"
+            ,"bifibtc"
+            ,"uipbtc"
+            ,"mexbtc"
+            ,"aacbtc"
+            ,"ncashbtc"
+            ,"qspbtc"
+            ,"xrpbtc"
+            ,"meetbtc"
+            ,"qtumbtc"
+            ,"sbtcbtc"
+            ,"mtbtc"
+            ,"htbtc"
+            ,"eosbtc"
+            ,"iotabtc"
+            ,"swftcbtc"
+            ,"dashbtc"
+            ,"thetabtc"
+            ,"elfbtc"
+            ,"propybtc"
+            ,"ontbtc"
+            ,"cvcoinbtc"
+            ,"wavesbtc"
+            ,"cdcbtc"
+            ,"stkbtc"
+            ,"chatbtc"
+            ,"evxbtc"
+            ,"ctxcbtc"
+            ,"grsbtc"
+            ,"neobtc"
+            ,"xmrbtc"
+            ,"tosbtc"
+            ,"cmtbtc"
+            ,"trxbtc"
+            ,"hitbtc"
+            ,"hotbtc"
+            ,"btsbtc"
+            ,"xzcbtc"
+            ,"wiccbtc"
+            ,"sntbtc"
+            ,"zilbtc"
+            ,"ethbtc"
+            ,"smtbtc"
+            ,"gasbtc"
+            ,"reqbtc"
+            ,"nasbtc"
+            ,"powrbtc"
+            ,"topcbtc"
+            ,"dtabtc"
+            ,"ardrbtc"
+            ,"mtlbtc"
+            ,"qunbtc"
+            ,"pntbtc"
+            ,"actbtc"
+            ,"dgdbtc"
+            ,"wprbtc"
+            ,"pcbtc"
+            ,"etcbtc"
+            ,"wtcbtc"
+            ,"lskbtc"
+            ,"saltbtc"
+            ,"omgbtc"
+            ,"adabtc"
+            ,"portalbtc"
+            ,"iicbtc"
+            ,"ocnbtc"
+            ,"ruffbtc"
+            ,"blzbtc"
+            ,"ltcbtc"
+            ,"hcbtc"
+            ,"yccbtc"
+            ,"bixbtc"
+            ,"egccbtc"
+            ,"rdnbtc"
+            ,"mtxbtc"
+            ,"dcrbtc"
+            ,"batbtc"
+            ,"zecbtc"
+            ,"lbabtc"
+            ,"aebtc"
+            ,"ostbtc"
+            ,"cvcbtc"
+            ,"socbtc"
+            ,"icxbtc"
+            ,"getbtc"
+            ,"storjbtc"
+            ,"lunbtc"
+            ,"manbtc"
+            ,"bcxbtc"
+            ,"sncbtc"
+            ,"zrxbtc"
+            ,"phxbtc"
+            ,"tnbbtc"
+            ,"xvgbtc"
+            ,"muskbtc"
+            ,"18cbtc"
+            ,"ucbtc"
+            ,"srnbtc"
+            ,"dgbbtc"
+            ,"rcnbtc"
+            ,"kanbtc"
+            ,"gscbtc"
+            ,"xlmbtc"
+            ,"tntbtc"
+            ,"engbtc"
+            ,"zenbtc"
+            ,"iostbtc"
+            ,"datbtc"
+            ,"appcbtc"
+            ,"vetbtc"
+            ,"itcbtc"
+            ,"zjltbtc"
+            ,"wanbtc"
+            ,"nanobtc"
+            ,"mcobtc"
+            ,"mdsbtc"
+            ,"gnxbtc"
+            ,"adxbtc"
+            ,"idtbtc"
+            ,"zlabtc"
+            ,"butbtc"
+            ,"gntbtc"
+            ,"astbtc"
+            ,"linkbtc"
+            ,"xmxbtc"
+            ,"edubtc"
+            ,"triobtc"
+            ,"gvebtc"
+            ,"gxcbtc"
+            ,"renbtc"
+            ,"boxbtc"
+            ,"ekobtc"
+            ,"bchbtc"
+            ,"eoseth"
+            ,"hteth"
+            ,"adaeth"
+            ,"omgeth"
+            ,"xmreth"
+            ,"iotaeth"
+            ,"nanoeth"
+            ,"zeneth"
+            ,"elaeth"
+            ,"paieth"
+            ,"btmeth"
+            ,"hiteth"
+            ,"dbceth"
+            ,"cmteth"
+            ,"edueth"
+            ,"zlaeth"
+            ,"iosteth"
+            ,"trxeth"
+            ,"onteth"
+            ,"polyeth"
+            ,"knceth"
+            ,"qtumeth"
+            ,"dcreth"
+            ,"zileth"
+            ,"boxeth"
+            ,"tnteth"
+            ,"lbaeth"
+            ,"ocneth"
+            ,"bateth"
+            ,"chateth"
+            ,"dateth"
+            ,"kaneth"
+            ,"gxceth"
+            ,"naseth"
+            ,"tnbeth"
+            ,"dtaeth"
+            ,"waxeth"
+            ,"elfeth"
+            ,"ctxceth"
+            ,"ekoeth"
+            ,"rcneth"
+            ,"soceth"
+            ,"veteth"
+            ,"manaeth"
+            ,"ruffeth"
+            ,"ncasheth"
+            ,"blzeth"
+            ,"abteth"
+            ,"xlmeth"
+            ,"mcoeth"
+            ,"acteth"
+            ,"gnteth"
+            ,"appceth"
+            ,"zrxeth"
+            ,"topceth"
+            ,"powreth"
+            ,"wtceth"
+            ,"mtneth"
+            ,"swftceth"
+            ,"gaseth"
+            ,"wicceth"
+            ,"gnxeth"
+            ,"aidoceth"
+            ,"qasheth"
+            ,"mtxeth"
+            ,"reqeth"
+            ,"itceth"
+            ,"yeeeth"
+            ,"waneth"
+            ,"srneth"
+            ,"hceth"
+            ,"thetaeth"
+            ,"linketh"
+            ,"ardreth"
+            ,"btseth"
+            ,"leteth"
+            ,"dgbeth"
+            ,"cvceth"
+            ,"osteth"
+            ,"wpreth"
+            ,"bfteth"
+            ,"propyeth"
+            ,"lsketh"
+            ,"mdseth"
+            ,"icxeth"
+            ,"xzceth"
+            ,"xvgeth"
+            ,"stketh"
+            ,"rdneth"
+            ,"luneth"
+            ,"quneth"
+            ,"steemeth"
+            ,"qspeth"
+            ,"payeth"
+            ,"meeteth"
+            ,"evxeth"
+            ,"grseth"
+            ,"salteth"
+            ,"engeth"
+            ,"snceth"
+            ,"dgdeth"
+            ,"asteth"
+            ,"bixeth"
+            ,"adxeth"
+            ,"utketh"
+            ,"smteth"
+            ,"waveseth"
+            ,"aeeth"
+            ,"ekteth"
+            ,"musketh"
+            ,"uuueth"
+            ,"xmxeth"
+            ,"gsceth"
+            ,"sheeth"
+            ,"toseth"
+            ,"cnneth"
+            ,"bkbteth"
+            ,"gveeth"
+            ,"rccceth"
+            ,"seeleeth"
+            ,"ncceth"
+            ,"zjlteth"
+            ,"uceth"
+            ,"kcasheth"
+            ,"ftieth"
+            ,"pnteth"
+            ,"maneth"
+            ,"mexeth"
+            ,"pceth"
+            ,"cvcoineth"
+            ,"gtceth"
+            ,"sspeth"
+            ,"cdceth"
+            ,"uipeth"
+            ,"trioeth"
+            ,"idteth"
+            ,"buteth"
+            ,"iiceth"
+            ,"aaceth"
+            ,"lxteth"
+            ,"18ceth"
+            ,"geteth"
+            ,"rteeth"
+            ,"portaleth"
+            ,"daceth"
+            ,"mteth"
+            ,"ycceth"
+            ,"lymeth"
+            ,"bcveth"
+            ,"reneth"
+            ,"faireth"
+            ,"egcceth"
+            ,"hoteth"
+            ,"datxeth"
+            ,"ltcht"
+            ,"eosht"
+            ,"xrpht"
+            ,"etcht"
+            ,"bchht"
+            ,"dashht"
+            ,"hptht"
+            ,"iostht"
+            ,"kcashht"
+            ,"mtht"};
     private String mSymbol = "htusdt";
     private String mPeriod = "1day";
-    private String mSize = "500";
+    private String mSize = "400";
     private String kLineUrl = "/market/history/kline?symbol=%s&period=%s&size=%s";
     private HistoryKLine mHistoryKLine;
     private List<PointValue> mPointValues_Y;
@@ -74,22 +467,22 @@ public class MacdBgService extends Service {
             public void run() {
                 getGoldPrice();//抓取黄金
             }
-        },0,1,TimeUnit.HOURS);
+        },0,2,TimeUnit.HOURS);
 
         ThreadUtil.runSingleScheduledService(new Runnable() {
             @Override
             public void run() {
                 SendMailUtil.send("641380205@qq.com","数据抓取-我还活着","心跳");
             }
-        },0,10,TimeUnit.MINUTES);
+        },0,30,TimeUnit.MINUTES);
 
         ThreadUtil.runSingleScheduledService(new Runnable() {
             @Override
             public void run() {
                 mCurSymbo = 0;
-                getData();//抓取火币
+                getData();//抓取火
             }
-        },0,1,TimeUnit.HOURS);
+        },0,2,TimeUnit.HOURS);
     }
 
     private void analyseData() {
@@ -99,7 +492,7 @@ public class MacdBgService extends Service {
         double curHoldMACDAvg = 0d;//买入后macd平均值
         int holdDay = 0;//持有天数
         double curHoldMACDSum = 0d;
-        StringBuilder lBuySaleBuilder = new StringBuilder("火币：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
+        StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
         for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
             double closeVal = mPointValues_Y.get(lI).getY();
             double macd = mPointValues_Y_MACD.get(lI).getY();
@@ -118,12 +511,12 @@ public class MacdBgService extends Service {
                         curHoldMACDAvg = macd;
                         holdDay = 1;
                         curHoldMACDSum = macd;
-                        String msg = "\n\n"+(lI+1)+" ,macd:"+String.format("%.5f",macd)+" >0, 持有后macd平均值:" +String.format("%.5f",curHoldMACDAvg)+ ",持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ====================>买入\n";
+                        String msg = "\n\n"+(lI+1)+" ,macd:"+String.format("%.5f",macd)+" >0, macd avg:" +String.format("%.5f",curHoldMACDAvg)+ ",天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ====================>买入\n";
                         lBuySaleBuilder.append(msg);
                         Log.d("vbvb", msg);
                         //如果买入信号是最后进一条数据那么说明是今天，就发送邮件通知
                         if (lI==mPointValues_Y_MACD.size()-1){
-                            SendMailUtil.send("641380205@qq.com","火币-买入",msg);
+                            SendMailUtil.send("641380205@qq.com","火-买",msg);
                         }
                     }
                 }else if (curStatus == STATUS_HOLD){
@@ -132,7 +525,7 @@ public class MacdBgService extends Service {
                     curHoldMACDAvg = curHoldMACDSum/holdDay;
                     if (macd>=curHoldMACDAvg){
                         //继续持有
-                        String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" >= 持有后macd平均值:"+String.format("%.5f",curHoldMACDAvg)+" ,持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ==>继续持有\n";
+                        String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" >= macd avg:"+String.format("%.5f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ==>继续持有\n";
                         Log.d("vbvb", msg);
                         lBuySaleBuilder.append(msg);
                     }else {
@@ -141,10 +534,10 @@ public class MacdBgService extends Service {
                             double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                             shouYiRateSum += curShouYiRate;
                             curStatus = STATUS_NULL;
-                            String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" < 持有后macd平均值:"+String.format("%.5f",curHoldMACDAvg)+" ,持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ,收益率："+String.format("%.5f",curShouYiRate*100)+" %========>卖出\n";
+                            String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" < macd avg:"+String.format("%.5f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ,收益率："+String.format("%.5f",curShouYiRate*100)+" %========>卖出\n";
                             Log.d("vbvb", msg);
                             if (lI==mPointValues_Y_MACD.size()-1){
-                                SendMailUtil.send("641380205@qq.com","火币-卖出",msg);
+                                SendMailUtil.send("641380205@qq.com","火-卖",msg);
                             }
                             lBuySaleBuilder.append(msg);
                         }
@@ -155,25 +548,26 @@ public class MacdBgService extends Service {
                     double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                     shouYiRateSum += curShouYiRate;
                     curStatus = STATUS_NULL;
-                    String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" < 0 ,持有天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ,收益率："+String.format("%.5f",curShouYiRate*100)+" %========>卖出\n";
+                    String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" < 0 ,天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ,收益率："+String.format("%.5f",curShouYiRate*100)+" %========>卖出\n";
                     Log.d("vbvb", msg);
                     if (lI==mPointValues_Y_MACD.size()-1){
-                        SendMailUtil.send("641380205@qq.com","火币-卖出",msg);
+                        SendMailUtil.send("641380205@qq.com","火-卖",msg);
                     }
                     lBuySaleBuilder.append(msg);
                 }
             }
         }
-        String msg = "\n\n总收益率：" + String.format("%.2f",shouYiRateSum * 100) + "%";
+        String msg = "";
         Log.d("vbvb", msg);
         if (curStatus==STATUS_HOLD){
-            msg = msg+",当前状态持有中\n";
+            msg = msg+"当前-持有";
             lBuySaleBuilder.append(msg);
         }else {
-            msg = msg+",当前状态非持有\n";
+            msg = msg+"当前-非持";
             lBuySaleBuilder.append(msg);
         }
-        SendMailUtil.send("641380205@qq.com","火币-日常播报",lBuySaleBuilder.toString());
+        msg = msg+",总收：" + String.format("%.1f",shouYiRateSum * 100) + "%\n";
+        SendMailUtil.send("641380205@qq.com","火-播-"+msg,lBuySaleBuilder.toString());
     }
 
     private void parseData() {
@@ -230,7 +624,7 @@ public class MacdBgService extends Service {
                             //得出结论
                             getData();//获取下一跳数据
                         }else {
-                            SendMailUtil.send("641380205@qq.com","火币-抓取出错",mSymbols[mCurSymbo]+": "+pResponseInfo.result);
+                            SendMailUtil.send("641380205@qq.com","火-抓错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pResponseInfo.result);
                             //1 5分钟以后重新运行
                             new Handler().postDelayed(new Runnable(){
                                 @Override
@@ -243,7 +637,7 @@ public class MacdBgService extends Service {
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
-                        SendMailUtil.send("641380205@qq.com","火币-抓取出错",mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
+                        SendMailUtil.send("641380205@qq.com","火-抓取出错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
 
                         //1 5分钟以后重新运行
@@ -259,7 +653,7 @@ public class MacdBgService extends Service {
 
     @Override
     public void onDestroy() {
-        SendMailUtil.send("641380205@qq.com","火币-出错","执行了onDestroy");
+        SendMailUtil.send("641380205@qq.com","火-出错","执行了onDestroy");
         if (wakeLock != null) { wakeLock.release(); wakeLock = null; }
         super.onDestroy();
     }
@@ -286,7 +680,7 @@ public class MacdBgService extends Service {
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
-                        SendMailUtil.send("641380205@qq.com","黄金-抓取出错",pS+"\n"+pE.getMessage());
+                        SendMailUtil.send("641380205@qq.com","黄金-抓错",pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
                         //1 1个小时以后重新运行
                         new Handler().postDelayed(new Runnable(){
