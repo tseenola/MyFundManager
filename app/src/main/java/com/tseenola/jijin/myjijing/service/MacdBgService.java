@@ -17,6 +17,7 @@ import com.lidroid.xutils.http.client.HttpRequest;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
 import com.tseenola.jijin.myjijing.biz.huobi.model.MACDUtils;
 import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
+import com.tseenola.jijin.myjijing.utils.LogUtil;
 import com.tseenola.jijin.myjijing.utils.ThreadUtil;
 
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ public class MacdBgService extends Service {
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
     private String [] mSymbols = {
-            "cdcbtc",
             "btcusdt"
             ,"ethusdt"
             ,"xrpusdt"
@@ -672,6 +672,7 @@ public class MacdBgService extends Service {
                     public void onFailure(HttpException pE, String pS) {
                         SendMailUtil.send("641380205@qq.com","黄金-抓错",pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
+                        LogUtil.info("vbvb", "MacdBgService onFailure()  : " +"黄金-抓错"+pS+"\n"+pE.getMessage());
                     }
                 });
     }
@@ -700,6 +701,7 @@ public class MacdBgService extends Service {
         } catch (Exception e) {
             SendMailUtil.send("641380205@qq.com","黄金-抓取出错",e.getMessage());
             e.printStackTrace();
+            LogUtil.info("vbvb", "MacdBgService getGoldPrice()  : " + "黄金-抓取出错"+e.getMessage());
             return 0;
         }
     }

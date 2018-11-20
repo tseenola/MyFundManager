@@ -1,6 +1,6 @@
 package com.tseenola.jijin.myjijing.biz.mail;
 
-import android.util.Log;
+import com.tseenola.jijin.myjijing.utils.LogUtil;
 
 import java.io.File;
 import java.util.Date;
@@ -73,6 +73,7 @@ public class MailSender {
             return true;
         } catch (MessagingException ex) {
             ex.printStackTrace();
+            LogUtil.info("vbvb", "MailSender sendTextMail()  : " + ex.getMessage());
         }
         return false;
     }
@@ -120,6 +121,7 @@ public class MailSender {
             return true;
         } catch (MessagingException ex) {
             ex.printStackTrace();
+            LogUtil.info("vbvb", "MailSender sendHtmlMail()  : " + ex.getMessage());
         }
         return false;
     }
@@ -137,6 +139,7 @@ public class MailSender {
             return true;
         } catch (MessagingException e) {
             e.printStackTrace();
+            LogUtil.info("vbvb", "MailSender sendFileMail()  : " + e.getMessage());
             return false;
         }
 
@@ -192,7 +195,7 @@ public class MailSender {
             message.saveChanges();
 
         } catch (Exception e) {
-            Log.e("TAG", "创建带附件的邮件失败");
+            LogUtil.info("vbvb", "MailSender createAttachmentMail()  : " + e.getMessage());
             e.printStackTrace();
         }
         // 返回生成的邮件
