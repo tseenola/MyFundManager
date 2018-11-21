@@ -11,6 +11,7 @@ import com.tseenola.jijin.myjijing.biz.fundlist.view.FundListAty;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.view.FundStrategyAty;
 import com.tseenola.jijin.myjijing.biz.huobi.view.HuoBiAty;
 import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
+import com.tseenola.jijin.myjijing.utils.LogUtil;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -39,6 +40,7 @@ public class MainMenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
         ButterKnife.bind(this);
+        LogUtil.info("vbvb","启动啦");
     }
 
 
