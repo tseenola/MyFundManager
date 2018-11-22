@@ -17,10 +17,13 @@ import com.lidroid.xutils.http.client.HttpRequest;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
 import com.tseenola.jijin.myjijing.biz.huobi.model.MACDUtils;
 import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
+import com.tseenola.jijin.myjijing.utils.DateUtils;
 import com.tseenola.jijin.myjijing.utils.LogUtil;
 import com.tseenola.jijin.myjijing.utils.ThreadUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -441,6 +444,7 @@ public class MacdBgService extends Service {
     private List<PointValue> mPointValues_Y_MACD;
     private List<PointValue> mPointValues_Y_DIF;
     private List<PointValue> mPointValues_Y_DEA;
+    private List<String> mDate;
     private int mCurSymbo = 0;
     private static final double GOLD_PRICE_THRESHOLD = 265;
     private PowerManager.WakeLock wakeLock;
@@ -475,7 +479,7 @@ public class MacdBgService extends Service {
             public void run() {
                 SendMailUtil.send("641380205@qq.com","数据抓取-我还活着","心跳");
             }
-        },0,30,TimeUnit.MINUTES);
+        },0,1,TimeUnit.HOURS);
 
         ThreadUtil.runSingleScheduledService(new Runnable() {
             @Override
@@ -497,7 +501,6 @@ public class MacdBgService extends Service {
         for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
             double closeVal = mPointValues_Y.get(lI).getY();
             double macd = mPointValues_Y_MACD.get(lI).getY();
-
             if (macd > 0 ) {//上穿买入
                 if (curStatus == STATUS_NULL) {
                     double preMACD = 0d;
@@ -512,7 +515,7 @@ public class MacdBgService extends Service {
                         curHoldMACDAvg = macd;
                         holdDay = 1;
                         curHoldMACDSum = macd;
-                        String msg = "\n\n"+(lI+1)+" ,macd:"+String.format("%.8f",macd)+" >0, macd avg:" +String.format("%.8f",curHoldMACDAvg)+ ",天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ====================>买入\n";
+                        String msg = "\n\n"+mDate.get(lI)+" ,macd:"+String.format("%.8f",macd)+" >0, macd avg:" +String.format("%.8f",curHoldMACDAvg)+ ",天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ====================>买入\n";
                         lBuySaleBuilder.append(msg);
                         Log.d("vbvb", msg);
                         //如果买入信号是最后进一条数据那么说明是今天，就发送邮件通知
@@ -526,7 +529,7 @@ public class MacdBgService extends Service {
                     curHoldMACDAvg = curHoldMACDSum/holdDay;
                     if (macd>=curHoldMACDAvg){
                         //继续持有
-                        String msg = (lI+1)+" ,macd:"+String.format("%.5f",macd)+" >= macd avg:"+String.format("%.5f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.5f",closeVal)+" ==>继续持有\n";
+                        String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",macd)+" >= macd avg:"+String.format("%.8f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ==>继续持有\n";
                         Log.d("vbvb", msg);
                         lBuySaleBuilder.append(msg);
                         if (lI==mPointValues_Y_MACD.size()-1){
@@ -538,11 +541,11 @@ public class MacdBgService extends Service {
                             double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                             shouYiRateSum += curShouYiRate;
                             curStatus = STATUS_NULL;
-                            String msg = (lI+1)+" ,macd:"+String.format("%.8f",macd)+" < macd avg:"+String.format("%.8f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.2f",curShouYiRate*100)+" %========>卖出\n";
+                            String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",macd)+" < macd avg:"+String.format("%.8f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.2f",curShouYiRate*100)+" %========>卖出\n";
                             Log.d("vbvb", msg);
                             lBuySaleBuilder.append(msg);
                             if (lI==mPointValues_Y_MACD.size()-1){
-                                SendMailUtil.send("641380205@qq.com","火-卖-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.1f",shouYiRateSum * 100),lBuySaleBuilder.toString());
+                                SendMailUtil.send("641380205@qq.com","火-卖-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.1f",shouYiRateSum * 100)+"%",lBuySaleBuilder.toString());
                             }
                         }
                     }
@@ -552,26 +555,15 @@ public class MacdBgService extends Service {
                     double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                     shouYiRateSum += curShouYiRate;
                     curStatus = STATUS_NULL;
-                    String msg = (lI+1)+" ,macd:"+String.format("%.8f",macd)+" < 0 ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.8f",curShouYiRate*100)+" %========>卖出\n";
+                    String msg = (mDate.get(lI))+" ,macd:"+String.format("%.8f",macd)+" < 0 ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.8f",curShouYiRate*100)+" %========>卖出\n";
                     Log.d("vbvb", msg);
                     lBuySaleBuilder.append(msg);
                     if (lI==mPointValues_Y_MACD.size()-1){
-                        SendMailUtil.send("641380205@qq.com","火-卖-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.1f",shouYiRateSum * 100),lBuySaleBuilder.toString());
+                        SendMailUtil.send("641380205@qq.com","火-卖-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.1f",shouYiRateSum * 100)+"%",lBuySaleBuilder.toString());
                     }
                 }
             }
         }
-        /*String msg = mSymbols[mCurSymbo]+" ";
-        Log.d("vbvb", msg);
-        if (curStatus==STATUS_HOLD){
-            msg = msg+"当前-持有";
-            lBuySaleBuilder.append(msg);
-            msg = msg+",总收：" + String.format("%.1f",shouYiRateSum * 100) + "%\n";
-            SendMailUtil.send("641380205@qq.com","火-播-"+msg,lBuySaleBuilder.toString());
-        }else if (curStatus == STATUS_NULL && ){
-            msg = msg+"当前-非持";
-            lBuySaleBuilder.append(msg);
-        }*/
     }
 
     private void parseData() {
@@ -581,7 +573,12 @@ public class MacdBgService extends Service {
         mPointValues_Y_MACD = new ArrayList<PointValue>();//y轴值，MACD
         mPointValues_Y_DIF = new ArrayList<PointValue>();//y轴值，DIF
         mPointValues_Y_DEA = new ArrayList<PointValue>();//y轴值，DEA
+        mDate = new ArrayList<>();
+        Date date = new Date();
+        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
+
         for (int i = 0; i < lDataBeans.size(); i++) {
+            mDate.add(DateUtils.getNextDay(date,-(lDataBeans.size() - i - 1),format));
             // 收盘值
             double closeVal = lDataBeans.get(lDataBeans.size() - i - 1).getClose();
             mPointValues_Y.add(new PointValue(i, (float) closeVal));//净值

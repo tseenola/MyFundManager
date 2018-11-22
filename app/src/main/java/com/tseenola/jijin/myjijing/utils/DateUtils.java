@@ -1,6 +1,8 @@
 package com.tseenola.jijin.myjijing.utils;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by lenovo on 2018/6/1.
@@ -14,4 +16,10 @@ public class DateUtils {
         return format.format(pTimeStamp);
     }
 
+    public static String getNextDay(Date date, int pNextDate,SimpleDateFormat pDateFormat) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_MONTH, pNextDate);
+        return pDateFormat.format(calendar.getTimeInMillis());
+    }
 }
