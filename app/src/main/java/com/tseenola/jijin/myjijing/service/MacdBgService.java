@@ -40,7 +40,8 @@ public class MacdBgService extends Service {
     private static final int STATUS_HOLD = 1;//持有状态
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
-    private String [] mSymbols = {
+    private String [] mSymbols = {"bcdbtc"};
+    /*private String [] mSymbols = {
             "btcusdt"
             ,"ethusdt"
             ,"xrpusdt"
@@ -434,7 +435,7 @@ public class MacdBgService extends Service {
             ,"hptht"
             ,"iostht"
             ,"kcashht"
-            ,"mtht"};
+            ,"mtht"};*/
     private String mSymbol = "htusdt";
     private String mPeriod = "1day";
     private String mSize = "400";
@@ -532,6 +533,8 @@ public class MacdBgService extends Service {
                     curHoldMACDAvg = curHoldMACDSum/holdDay;
                     if (macd>=curHoldMACDAvg){
                         //继续持有
+
+                        //如果当前
                         String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",macd)+" >= macd avg:"+String.format("%.8f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ==>继续持有\n";
                         Log.d("vbvb", msg);
                         lBuySaleBuilder.append(msg);

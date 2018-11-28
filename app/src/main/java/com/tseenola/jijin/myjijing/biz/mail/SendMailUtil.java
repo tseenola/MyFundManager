@@ -2,6 +2,8 @@ package com.tseenola.jijin.myjijing.biz.mail;
 
 import android.support.annotation.NonNull;
 
+import com.tseenola.jijin.myjijing.utils.LogUtil;
+
 import java.io.File;
 
 /**
@@ -34,6 +36,7 @@ public class SendMailUtil {
     }
 
     public static void send(String toAdd,String pTheme,String pBody){
+        LogUtil.info("vbvb", "SendMailUtil send()  : "+pTheme );
         final MailInfo mailInfo = creatMail(toAdd,pTheme,pBody);
         final MailSender sms = new MailSender();
         new Thread(new Runnable() {
