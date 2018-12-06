@@ -626,12 +626,14 @@ public class MacdBgService extends Service {
                         Log.d("vbvb", "onSuccess: " + pResponseInfo.result);
                         if (pResponseInfo.result.contains("\"status\":\"ok\"")){
                             mHistoryKLine = lGson.fromJson(pResponseInfo.result, HistoryKLine.class);
-                            //处理数据
-                            parseData();
-                            //分析数据
-                            analyseData();
-                            mCurSymbo++;
-                            //得出结论
+                            if (mHistoryKLine.getData()!=null && mHistoryKLine.getData().size()>=60){
+                                //处理数据
+                                parseData();
+                                //分析数据
+                                analyseData();
+                                mCurSymbo++;
+                                //得出结论
+                            }
                         }else {
                             SendMailUtil.send("641380205@qq.com","火-抓错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pResponseInfo.result);
                             mCurSymbo++;
