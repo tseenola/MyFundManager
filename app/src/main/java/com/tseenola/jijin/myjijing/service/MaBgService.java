@@ -501,6 +501,7 @@ public class MaBgService extends Service {
     private String kLineUrl = "/market/history/kline?symbol=%s&period=%s&size=%s";
     private HistoryKLine mHistoryKLine;
     private List<PointValue> mPointValues_Y;
+    private List<PointValue> mPointValues_AVG20;//收盘建20日均线
     private List<String> mDate;
     private int mCurSymbo = 0;
     //金价低于这个就买入
@@ -544,7 +545,7 @@ public class MaBgService extends Service {
         int holdDay = 0;//持有天数
         double curHoldMACDSum = 0d;
         StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
-        for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
+        for (int lI = 0; lI < mPointValues_Y.size(); lI++) {
             double closeVal = mPointValues_Y.get(lI).getY();
             double macd = mPointValues_Y_MACD.get(lI).getY();
             if (macd > 0 ) {//上穿买入
@@ -619,6 +620,7 @@ public class MaBgService extends Service {
     private void parseData() {
         List<HistoryKLine.DataBean> lDataBeans = mHistoryKLine.getData();
         mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
+        mPointValues_AVG20 = new ArrayList<PointValue>(PointValue);
         mDate = new ArrayList<>();
         Date date = new Date();
         SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
@@ -629,7 +631,7 @@ public class MaBgService extends Service {
             double closeVal = lDataBeans.get(lDataBeans.size() - i - 1).getClose();
             mPointValues_Y.add(new PointValue(i, (float) closeVal));//净值
 
-
+            mPointValues_AVG20.add(new PointValue(i,));
         }
     }
 
