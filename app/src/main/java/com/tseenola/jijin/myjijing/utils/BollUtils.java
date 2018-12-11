@@ -4,10 +4,10 @@ import java.util.List;
 
 /**
  * Created by lenovo on 2018/8/12.
- * 描述：
+ * 描述：计算boll线
  */
 
-public class MathUtils {
+public class BollUtils {
     /**
      * 获取标准差
      */
@@ -96,8 +96,9 @@ public class MathUtils {
      * @return 运算结果
      */
     public double getSum(List<Double> pInputData) {
-        if (pInputData == null || pInputData.size() == 0)
+        if (pInputData == null || pInputData.size() == 0) {
             return -1;
+        }
         int len = pInputData.size();
         double sum = 0;
         for (int i = 0; i < len; i++) {
@@ -105,6 +106,5 @@ public class MathUtils {
         }
 
         return sum;
-
     }
 }

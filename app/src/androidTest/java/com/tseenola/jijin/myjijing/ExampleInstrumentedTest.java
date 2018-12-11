@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.tseenola.jijin.myjijing.biz.fundhistory.model.FundInfo;
 import com.tseenola.jijin.myjijing.biz.fundlist.model.FundListInfo;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
+import com.tseenola.jijin.myjijing.utils.WRUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +16,7 @@ import org.litepal.crud.DataSupport;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -77,8 +79,16 @@ public class ExampleInstrumentedTest {
 
 
     @Test
-    public void testMACD() throws Exception {
+    public void testWR() throws Exception {
+        List<Double> lList = new ArrayList<>();
+        lList.add(15d);
+        lList.add(12d);
+        lList.add(9d);
+        lList.add(13d);
 
+
+        double wr = WRUtils.getWR(lList,5);
+        int i = 0;
     }
 
     @Test

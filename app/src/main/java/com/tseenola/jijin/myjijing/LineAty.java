@@ -8,7 +8,7 @@ import android.view.View;
 
 import com.tseenola.jijin.myjijing.base.view.BaseAty;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
-import com.tseenola.jijin.myjijing.utils.MathUtils;
+import com.tseenola.jijin.myjijing.utils.BollUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -101,7 +101,7 @@ public class LineAty extends BaseAty {
                 stdData20.add(closeVal);
             }
             //stdData.add(closeVal);
-            double std = new MathUtils().getStandardDiviation(stdData20);
+            double std = new BollUtils().getStandardDiviation(stdData20);
             //上轨:n天收盘价的移动平均线 + m * n 天收盘价格的标准差
             double m = 2d;
             mPointValues_Y_BollUp.add(new PointValue(i, (float) (avg+m*std)));

@@ -14,7 +14,7 @@ import com.tseenola.jijin.myjijing.biz.fundhistory.presenter.FundHistoryPrt;
 import com.tseenola.jijin.myjijing.biz.fundstrategy.model.DataNetWorthTrend;
 import com.tseenola.jijin.myjijing.utils.Constant;
 import com.tseenola.jijin.myjijing.utils.DateUtils;
-import com.tseenola.jijin.myjijing.utils.MathUtils;
+import com.tseenola.jijin.myjijing.utils.BollUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -128,7 +128,7 @@ public class FundHistoryAty extends BaseAty implements IFundHistoryAty {
         ArrayList<Double> lStdData = new ArrayList<>();
         for (int i = 0; i < lDataNetWorthTrendBeens.size(); i++) {
             lStdData.add( lDataNetWorthTrendBeens.get(i).getY());
-            float stdVal = (float) new MathUtils().getStandardDiviation(lStdData);
+            float stdVal = (float) new BollUtils().getStandardDiviation(lStdData);
             mPointValues_Y_Std.add(new PointValue(i,0.8f+stdVal));//净值标准差
 
             sum += (float) (lDataNetWorthTrendBeens.get(i).getY());

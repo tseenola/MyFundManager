@@ -15,17 +15,13 @@ import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
-import com.tseenola.jijin.myjijing.biz.huobi.model.MACDUtils;
 import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
 import com.tseenola.jijin.myjijing.utils.DateUtils;
-import com.tseenola.jijin.myjijing.utils.LogUtil;
 import com.tseenola.jijin.myjijing.utils.ThreadUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -538,89 +534,13 @@ public class MaBgService extends Service {
     }
 
     private void analyseData() {
-        int curStatus = STATUS_NULL;
-        double shouYiRateSum = 0;//收益率
-        double curHoldVal = 0d;//当前持有价格
-        double curHoldMACDAvg = 0d;//买入后macd平均值
-        int holdDay = 0;//持有天数
-        double curHoldMACDSum = 0d;
-        StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
-        for (int lI = 0; lI < mPointValues_Y.size(); lI++) {
-            double closeVal = mPointValues_Y.get(lI).getY();
-            double macd = mPointValues_Y_MACD.get(lI).getY();
-            if (macd > 0 ) {//上穿买入
-                if (curStatus == STATUS_NULL) {
-                    double preMACD = 0d;
-                    if (lI>0) {
-                        preMACD = mPointValues_Y_MACD.get(lI-1).getY();
-                    }else {
-                        preMACD = macd;
-                    }
-                    if (macd > preMACD){//如果macd 是上涨状态就买入
-                        curStatus = STATUS_HOLD;
-                        curHoldVal = closeVal;
-                        curHoldMACDAvg = macd;
-                        holdDay = 1;
-                        curHoldMACDSum = macd;
-                        String msg = "\n\n"+mDate.get(lI)+" ,macd:"+String.format("%.8f",macd)+" >0, macd avg:" +String.format("%.8f",curHoldMACDAvg)+ ",天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ====================>买入\n";
-                        lBuySaleBuilder.append(msg);
-                        Log.d("vbvb", msg);
-                        //如果买入信号是最后进一条数据那么说明是今天，就发送邮件通知
-                        if (lI==mPointValues_Y_MACD.size()-1){
-                            SendMailUtil.send("641380205@qq.com","火-买-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%",lBuySaleBuilder.toString());
-                        }
-                    }
-                }else if (curStatus == STATUS_HOLD){
-                    holdDay ++;
-                    curHoldMACDSum += macd;
-                    curHoldMACDAvg = curHoldMACDSum/holdDay;
-                    if (macd>=curHoldMACDAvg){
-                        //继续持有
 
-                        //如果当前
-                        String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",macd)+" >= macd avg:"+String.format("%.8f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ==>继续持有\n";
-                        Log.d("vbvb", msg);
-                        lBuySaleBuilder.append(msg);
-                        if (lI==mPointValues_Y_MACD.size()-1){
-                            double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
-                            shouYiRateSum += curShouYiRate;
-                            SendMailUtil.send("641380205@qq.com","火-持有-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
-                        }
-                    }else {
-                        //卖出
-                        if (curStatus == STATUS_HOLD) {
-                            double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
-                            shouYiRateSum += curShouYiRate;
-                            curStatus = STATUS_NULL;
-                            String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",macd)+" < macd avg:"+String.format("%.8f",curHoldMACDAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.2f",curShouYiRate*100)+" %========>卖出\n";
-                            Log.d("vbvb", msg);
-                            lBuySaleBuilder.append(msg);
-                            if (lI==mPointValues_Y_MACD.size()-1){
-                                SendMailUtil.send("641380205@qq.com","火-卖-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
-                            }
-                        }
-                    }
-                }
-            }else{//下穿卖出
-                if (curStatus == STATUS_HOLD){
-                    double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
-                    shouYiRateSum += curShouYiRate;
-                    curStatus = STATUS_NULL;
-                    String msg = (mDate.get(lI))+" ,macd:"+String.format("%.8f",macd)+" < 0 ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.8f",curShouYiRate*100)+" %========>卖出\n";
-                    Log.d("vbvb", msg);
-                    lBuySaleBuilder.append(msg);
-                    if (lI==mPointValues_Y_MACD.size()-1){
-                        SendMailUtil.send("641380205@qq.com","火-卖-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
-                    }
-                }
-            }
-        }
     }
 
     private void parseData() {
         List<HistoryKLine.DataBean> lDataBeans = mHistoryKLine.getData();
         mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
-        mPointValues_AVG20 = new ArrayList<PointValue>(PointValue);
+        mPointValues_AVG20 = new ArrayList<PointValue>();
         mDate = new ArrayList<>();
         Date date = new Date();
         SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
@@ -631,7 +551,7 @@ public class MaBgService extends Service {
             double closeVal = lDataBeans.get(lDataBeans.size() - i - 1).getClose();
             mPointValues_Y.add(new PointValue(i, (float) closeVal));//净值
 
-            mPointValues_AVG20.add(new PointValue(i,));
+            //mPointValues_AVG20.add(new PointValue(i,));
         }
     }
 
@@ -687,66 +607,5 @@ public class MaBgService extends Service {
         SendMailUtil.send("641380205@qq.com","火-出错-onDestroy","执行了onDestroy");
         if (wakeLock != null) { wakeLock.release(); wakeLock = null; }
         super.onDestroy();
-    }
-
-    /**
-     * 获取黄金价格
-     */
-    protected void getGoldPrice(){
-        String url = "http://www.sge.com.cn/";
-        HttpUtils lHttpUtils = new HttpUtils();
-        lHttpUtils.send(HttpRequest.HttpMethod.GET,
-                url,
-                new RequestCallBack<String>() {
-
-                    @Override
-                    public void onSuccess(ResponseInfo<String> pResponseInfo) {
-                        double goldPrice = getGoldPrice(pResponseInfo.result);
-                        if (goldPrice<= GOLD_PRICE_THRESHOLD_BUY){
-                            SendMailUtil.send("641380205@qq.com","黄金-价格-买入","今日金价："+goldPrice+"小于阈值建议买入");
-                        }else if (goldPrice>=GOLD_PRICE_THRESHOLD_SALE){
-                            SendMailUtil.send("641380205@qq.com","黄金-价格-卖出","今日金价："+goldPrice);
-                        }else {
-                            SendMailUtil.send("641380205@qq.com","黄金-价格","今日金价："+goldPrice);
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(HttpException pE, String pS) {
-                        SendMailUtil.send("641380205@qq.com","黄金-抓错",pS+"\n"+pE.getMessage());
-                        Log.d("vbvb", "onFailure: "+pS);
-                        LogUtil.info("vbvb", "MacdBgService onFailure()  : " +"黄金-抓错"+pS+"\n"+pE.getMessage());
-                    }
-                });
-    }
-
-    /**
-     * 从html中获取黄金价格
-     * @param htmlData
-     * @return
-     */
-    private double getGoldPrice(String htmlData){
-        try {
-            int startIndex = htmlData.indexOf("<li><p>上海金早盘价（元）");
-            int endIndex = startIndex;
-            while(true){
-                String temp = htmlData.substring(endIndex,endIndex+5);
-                if(temp.equals("</li>")){
-                    break;
-                }
-                endIndex ++ ;
-            }
-            String liData = htmlData.substring(startIndex,endIndex+5);
-            int goldStartIndex = liData.indexOf("\">");
-            int goldEndIndex = liData.indexOf("</span>");
-            String goldPrice = liData.substring(goldStartIndex+2,goldEndIndex);
-            return Double.parseDouble(goldPrice);
-        } catch (Exception e) {
-            SendMailUtil.send("641380205@qq.com","黄金-抓取出错",e.getMessage());
-            e.printStackTrace();
-            LogUtil.info("vbvb", "MacdBgService getGoldPrice()  : " + "黄金-抓取出错"+e.getMessage());
-            return 0;
-        }
     }
 }
