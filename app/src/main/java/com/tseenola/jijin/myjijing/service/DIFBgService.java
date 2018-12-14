@@ -15,6 +15,7 @@ import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.tseenola.jijin.myjijing.biz.huobi.model.HistoryKLine;
+import com.tseenola.jijin.myjijing.biz.huobi.model.MACDUtils;
 import com.tseenola.jijin.myjijing.biz.mail.SendMailUtil;
 import com.tseenola.jijin.myjijing.utils.DateUtils;
 import com.tseenola.jijin.myjijing.utils.ThreadUtil;
@@ -22,6 +23,8 @@ import com.tseenola.jijin.myjijing.utils.ThreadUtil;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,17 +32,14 @@ import lecho.lib.hellocharts.model.PointValue;
 
 /**
  * Created by lenovo on 2018/11/6.
- * 描述：均线斜率买卖规则
- * 1.如果20日均线斜率为上升趋势买入。如果图片boll线上轨就卖出
- *
+ * 描述：DIF 斜率向上买入，斜率乡下卖出
  */
-public class MaBgService extends Service {
+public class DIFBgService extends Service {
     private static final int STATUS_NULL = 0;//非持有状态
     private static final int STATUS_HOLD = 1;//持有状态
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
-    private String [] mSymbols = {
-            "btcusdt"
+    private String [] mSymbols = {"btcusdt"
             ,"ethusdt"
             ,"xrpusdt"
             ,"bchusdt"
@@ -60,42 +60,7 @@ public class MaBgService extends Service {
             ,"paiusdt"
             ,"hptusdt"
             ,"elausdt"
-            ,"ontusdt"
-            ,"iostusdt"
-            ,"qtumusdt"
-            ,"trxusdt"
-            ,"dtausdt"
-            ,"zilusdt"
-            ,"ocnusdt"
-            ,"cmtusdt"
-            ,"elfusdt"
-            ,"gntusdt"
-            ,"socusdt"
-            ,"nasusdt"
-            ,"ctxcusdt"
-            ,"ruffusdt"
-            ,"vetusdt"
-            ,"letusdt"
-            ,"wiccusdt"
-            ,"xlmusdt"
-            ,"hcusdt"
-            ,"neousdt"
-            ,"cvcusdt"
-            ,"thetausdt"
-            ,"btsusdt"
-            ,"itcusdt"
-            ,"actusdt"
-            ,"mdsusdt"
-            ,"storjusdt"
-            ,"xemusdt"
-            ,"sntusdt"
-            ,"steemusdt"
-            ,"smtusdt"
-            ,"bixusdt"
-            ,"usdthusd"
-            ,"btchusd"
-            ,"ethhusd"
-            ,"eoshusd"};
+            ,"ontusdt"};
     /*private String [] mSymbols = {
             "btcusdt"
             ,"ethusdt"
@@ -497,9 +462,15 @@ public class MaBgService extends Service {
     private String kLineUrl = "/market/history/kline?symbol=%s&period=%s&size=%s";
     private HistoryKLine mHistoryKLine;
     private List<PointValue> mPointValues_Y;
-    private List<PointValue> mPointValues_AVG20;//收盘建20日均线
+    private List<PointValue> mPointValues_Y_MACD;
+    private List<PointValue> mPointValues_Y_DIF;
+    private List<PointValue> mPointValues_Y_DEA;
     private List<String> mDate;
     private int mCurSymbo = 0;
+    //金价低于这个就买入
+    private static final double GOLD_PRICE_THRESHOLD_BUY = 265;
+    //金价高于这个就卖出
+    private static final double GOLD_PRICE_THRESHOLD_SALE = 276;
     private PowerManager.WakeLock wakeLock;
 
     @Nullable
@@ -512,7 +483,7 @@ public class MaBgService extends Service {
     public void onCreate() {
         super.onCreate();
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, MaBgService.class.getName());
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, DIFBgService.class.getName());
         wakeLock.acquire();
         //抓取数据
         getDataAndAnlyse();
@@ -530,13 +501,90 @@ public class MaBgService extends Service {
     }
 
     private void analyseData() {
+        int curStatus = STATUS_NULL;
+        double shouYiRateSum = 0;//收益率
+        double curHoldVal = 0d;//当前持有价格
+        double curHoldDIFAvg = 0d;//买入后DIF平均值
+        int holdDay = 0;//持有天数
+        double curHoldDIFSum = 0d;
+        StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
+        for (int lI = 0; lI < mPointValues_Y_DIF.size(); lI++) {
+            double closeVal = mPointValues_Y.get(lI).getY();
+            double curdif = mPointValues_Y_DIF.get(lI).getY();
+            double predif = 0;
+            if (lI>=1){
+                predif = mPointValues_Y_DIF.get(lI-1).getY();
+            }else {
+                predif = mPointValues_Y_DIF.get(0).getY();
+            }
 
+            if ((curdif-predif) >= 0 ) {//dif斜率向上买入
+                if (curStatus == STATUS_NULL) {//斜率向上没有买入-第一次买入
+                    curStatus = STATUS_HOLD;
+                    curHoldVal = closeVal;
+                    curHoldDIFAvg = curdif;
+                    holdDay = 1;
+                    curHoldDIFSum = curdif;
+                    String msg = "\n\n"+mDate.get(lI)+" ,curdif:"+String.format("%.8f",curdif)+" >0, curdif avg:" +String.format("%.8f",curHoldDIFAvg)+ ",天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ====================>买入\n";
+                    lBuySaleBuilder.append(msg);
+                    Log.d("vbvb", msg);
+                    //如果买入信号是最后进一条数据那么说明是今天，就发送邮件通知
+                    if (lI==mPointValues_Y_DIF.size()-1){
+                        SendMailUtil.send("641380205@qq.com","火-买-DIF-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%",lBuySaleBuilder.toString());
+                    }
+                }else if (curStatus == STATUS_HOLD){//斜率向上，已经买入继续持有
+                    holdDay ++;
+                    curHoldDIFSum += curdif;
+                    curHoldDIFAvg = curHoldDIFSum/holdDay;
+                    if (curdif>=curHoldDIFAvg){
+                        //继续持有
+                        //如果当前
+                        String msg = mDate.get(lI)+" ,curdif:"+String.format("%.8f",curdif)+" >= curdif avg:"+String.format("%.8f",curHoldDIFAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ==>继续持有\n";
+                        Log.d("vbvb", msg);
+                        lBuySaleBuilder.append(msg);
+                        if (lI==mPointValues_Y_DIF.size()-1){
+                            double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                            shouYiRateSum += curShouYiRate;
+                            SendMailUtil.send("641380205@qq.com","火-持有-DIF-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
+                        }
+                    }else {
+                        //卖出
+                        if (curStatus == STATUS_HOLD) {
+                            double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                            shouYiRateSum += curShouYiRate;
+                            curStatus = STATUS_NULL;
+                            String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",curdif)+" < macd avg:"+String.format("%.8f",curHoldDIFAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.2f",curShouYiRate*100)+" %========>卖出\n";
+                            Log.d("vbvb", msg);
+                            lBuySaleBuilder.append(msg);
+                            if (lI==mPointValues_Y_DIF.size()-1){
+                                SendMailUtil.send("641380205@qq.com","火-卖-DIF-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
+                            }
+                        }
+                    }
+                }
+            }else{//dif斜率向上买入
+                if (curStatus == STATUS_HOLD){
+                    double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                    shouYiRateSum += curShouYiRate;
+                    curStatus = STATUS_NULL;
+                    String msg = (mDate.get(lI))+" ,macd:"+String.format("%.8f",curdif)+" < 0 ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.8f",curShouYiRate*100)+" %========>卖出\n";
+                    Log.d("vbvb", msg);
+                    lBuySaleBuilder.append(msg);
+                    if (lI==mPointValues_Y_MACD.size()-1){
+                        SendMailUtil.send("641380205@qq.com","火-卖-DIF-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
+                    }
+                }
+            }
+        }
     }
 
     private void parseData() {
         List<HistoryKLine.DataBean> lDataBeans = mHistoryKLine.getData();
+        LinkedList<Double> stdData = new LinkedList<>();
         mPointValues_Y = new ArrayList<PointValue>();//y轴值，实际价格
-        mPointValues_AVG20 = new ArrayList<PointValue>();
+        mPointValues_Y_MACD = new ArrayList<PointValue>();//y轴值，MACD
+        mPointValues_Y_DIF = new ArrayList<PointValue>();//y轴值，DIF
+        mPointValues_Y_DEA = new ArrayList<PointValue>();//y轴值，DEA
         mDate = new ArrayList<>();
         Date date = new Date();
         SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
@@ -546,8 +594,17 @@ public class MaBgService extends Service {
             // 收盘值
             double closeVal = lDataBeans.get(lDataBeans.size() - i - 1).getClose();
             mPointValues_Y.add(new PointValue(i, (float) closeVal));//净值
+            stdData.add(closeVal);
 
-            //mPointValues_AVG20.add(new PointValue(i,));
+            HashMap<String, Double> lHashMap = MACDUtils.getMACD(stdData, 12, 26, 9);
+            double macd = lHashMap.get("MACD");
+            mPointValues_Y_MACD.add(new PointValue(i, (float) macd));
+
+            double dif = lHashMap.get("DIF");
+            mPointValues_Y_DIF.add(new PointValue(i, (float) dif));
+
+            double dea = lHashMap.get("DEA");
+            mPointValues_Y_DEA.add(new PointValue(i, (float) dea));
         }
     }
 
@@ -556,7 +613,7 @@ public class MaBgService extends Service {
      */
     private void getData(){
         if (mCurSymbo>=mSymbols.length){
-            SendMailUtil.send("641380205@qq.com","火-循环完成","");
+            SendMailUtil.send("641380205@qq.com","火-循环完成-DIF","");
             return;
         }
         Log.d("vbvb", "getData: 进行请求了");
@@ -573,7 +630,7 @@ public class MaBgService extends Service {
                         Log.d("vbvb", "onSuccess: " + pResponseInfo.result);
                         if (pResponseInfo.result.contains("\"status\":\"ok\"")){
                             mHistoryKLine = lGson.fromJson(pResponseInfo.result, HistoryKLine.class);
-                            if (mHistoryKLine.getData()!=null && mHistoryKLine.getData().size()>30){//小于1个月的就算啦
+                            if (mHistoryKLine.getData()!=null && mHistoryKLine.getData().size()>=60){
                                 //处理数据
                                 parseData();
                                 //分析数据
@@ -582,7 +639,7 @@ public class MaBgService extends Service {
                                 //得出结论
                             }
                         }else {
-                            SendMailUtil.send("641380205@qq.com","火-抓错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pResponseInfo.result);
+                            SendMailUtil.send("641380205@qq.com","火-抓错-DIF-"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pResponseInfo.result);
                             mCurSymbo++;
                         }
                         getData();//获取下一跳数据
@@ -590,7 +647,7 @@ public class MaBgService extends Service {
 
                     @Override
                     public void onFailure(HttpException pE, String pS) {
-                        SendMailUtil.send("641380205@qq.com","火-抓取出错"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
+                        SendMailUtil.send("641380205@qq.com","火-抓取出错-DIF-"+mSymbols[mCurSymbo],mSymbols[mCurSymbo]+": "+pS+"\n"+pE.getMessage());
                         Log.d("vbvb", "onFailure: "+pS);
                         mCurSymbo++;
                         getData();//获取下一跳数据
@@ -600,7 +657,7 @@ public class MaBgService extends Service {
 
     @Override
     public void onDestroy() {
-        SendMailUtil.send("641380205@qq.com","火-出错-onDestroy","执行了onDestroy");
+        SendMailUtil.send("641380205@qq.com","火-出错-onDestroy-DIF","执行了onDestroy");
         if (wakeLock != null) { wakeLock.release(); wakeLock = null; }
         super.onDestroy();
     }

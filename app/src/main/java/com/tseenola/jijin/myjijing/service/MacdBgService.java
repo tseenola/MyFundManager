@@ -40,7 +40,28 @@ public class MacdBgService extends Service {
     private static final int STATUS_HOLD = 1;//持有状态
     private String dmain = "https://api.huobi.br.com";
     //private String dmain = "https://api.huobi.pro";
-    private String [] mSymbols = {"bcdbtc"};
+    private String [] mSymbols = {"btcusdt"
+            ,"ethusdt"
+            ,"xrpusdt"
+            ,"bchusdt"
+            ,"ltcusdt"
+            ,"etcusdt"
+            ,"eosusdt"
+            ,"htusdt"
+            ,"adausdt"
+            ,"dashusdt"
+            ,"omgusdt"
+            ,"zecusdt"
+            ,"iotausdt"
+            ,"xmrusdt"
+            ,"hb10usdt"
+            ,"gxcusdt"
+            ,"hitusdt"
+            ,"btmusdt"
+            ,"paiusdt"
+            ,"hptusdt"
+            ,"elausdt"
+            ,"ontusdt"};
     /*private String [] mSymbols = {
             "btcusdt"
             ,"ethusdt"

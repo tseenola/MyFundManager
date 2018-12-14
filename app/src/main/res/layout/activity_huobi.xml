@@ -68,7 +68,7 @@
 
     <Button
         android:id="@+id/bt_StartMacdService"
-        android:text="启动MACD service"
+        android:text="启动MACD DIF service"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>

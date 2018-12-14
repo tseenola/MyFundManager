@@ -89,6 +89,8 @@
                   android:label="火币MACD线策略回测"/>
 
         <service android:name=".service.MacdBgService" />
+
+        <service android:name=".service.DIFBgService"/>
     </application>
 
 </manifest>
