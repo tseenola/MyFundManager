@@ -509,16 +509,14 @@ public class DIFBgService extends Service {
         double curHoldDIFSum = 0d;
         StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
         for (int lI = 0; lI < mPointValues_Y_DIF.size(); lI++) {
+            if (lI<10){
+                continue;
+            }
             double closeVal = mPointValues_Y.get(lI).getY();
             double curdif = mPointValues_Y_DIF.get(lI).getY();
-            double predif = 0;
-            if (lI>=1){
-                predif = mPointValues_Y_DIF.get(lI-1).getY();
-            }else {
-                predif = mPointValues_Y_DIF.get(0).getY();
-            }
+            double predif = mPointValues_Y_DIF.get(lI-1).getY();
 
-            if ((curdif-predif) >= 0 ) {//dif斜率向上买入
+            if (curdif>=predif) {//dif斜率向上买入
                 if (curStatus == STATUS_NULL) {//斜率向上没有买入-第一次买入
                     curStatus = STATUS_HOLD;
                     curHoldVal = closeVal;

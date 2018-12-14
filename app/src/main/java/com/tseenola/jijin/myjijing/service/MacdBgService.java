@@ -524,6 +524,9 @@ public class MacdBgService extends Service {
         double curHoldMACDSum = 0d;
         StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
         for (int lI = 0; lI < mPointValues_Y_MACD.size(); lI++) {
+            if (lI<10){
+                continue;
+            }
             double closeVal = mPointValues_Y.get(lI).getY();
             double macd = mPointValues_Y_MACD.get(lI).getY();
             if (macd > 0 ) {//上穿买入
