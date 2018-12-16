@@ -51,17 +51,7 @@ public class MacdBgService extends Service {
             ,"adausdt"
             ,"dashusdt"
             ,"omgusdt"
-            ,"zecusdt"
-            ,"iotausdt"
-            ,"xmrusdt"
-            ,"hb10usdt"
-            ,"gxcusdt"
-            ,"hitusdt"
-            ,"btmusdt"
-            ,"paiusdt"
-            ,"hptusdt"
-            ,"elausdt"
-            ,"ontusdt"};
+            ,"zecusdt"};
     /*private String [] mSymbols = {
             "btcusdt"
             ,"ethusdt"

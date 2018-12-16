@@ -32,7 +32,8 @@ import lecho.lib.hellocharts.model.PointValue;
 /**
  * Created by lenovo on 2018/11/6.
  * 描述：均线斜率买卖规则
- * 1.如果20日均线斜率为上升趋势买入。如果图片boll线上轨就卖出
+ * 1.wr大于80就买入
+ * 2.wr小于20卖出
  *
  */
 public class WRBgService extends Service {
@@ -502,10 +503,6 @@ public class WRBgService extends Service {
     private List<PointValue> mPointValues_WR14;
     private List<String> mDate;
     private int mCurSymbo = 0;
-    //金价低于这个就买入
-    private static final double GOLD_PRICE_THRESHOLD_BUY = 265;
-    //金价高于这个就卖出
-    private static final double GOLD_PRICE_THRESHOLD_SALE = 276;
     private PowerManager.WakeLock wakeLock;
 
     @Nullable
@@ -535,7 +532,58 @@ public class WRBgService extends Service {
     }
 
     private void analyseData() {
+        int curStatus = STATUS_NULL;
+        double shouYiRateSum = 0;//收益率
+        double curHoldVal = 0d;//当前持有价格
+        int holdDay = 0;//持有天数
+        StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
+        for (int lI = 0; lI < mPointValues_WR14.size(); lI++) {
+            if (lI<10){
+                continue;
+            }
+            double closeVal = mPointValues_Y.get(lI).getY();
+            double wr14 = mPointValues_WR14.get(lI).getY();
+            if (wr14>=80) {//wr大于80，买入
+                if (curStatus == STATUS_NULL) {//wr 大于80 ，第一次买入
+                    curStatus = STATUS_HOLD;
+                    curHoldVal = closeVal;
+                    holdDay = 1;
+                    String msg = "\n\n"+mDate.get(lI)+" ,wr14:"+String.format("%.8f",wr14)+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ====================>买入\n";
+                    lBuySaleBuilder.append(msg);
+                    Log.d("vbvb", msg);
+                    //如果买入信号是最后进一条数据那么说明是今天，就发送邮件通知
+                    if (lI==mPointValues_WR14.size()-1){
+                        SendMailUtil.send("641380205@qq.com","火-买-DIF-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%",lBuySaleBuilder.toString());
+                    }
+                }else if (curStatus == STATUS_HOLD){//wr 大于80 ，已经买入继续持有
+                    holdDay ++;
+                    //继续持有
+                    //如果当前
+                    String msg = mDate.get(lI)+" ,curdif:"+String.format("%.8f",curdif)+" >= predif:"+String.format("%.8f",predif)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ==>继续持有\n";
+                    Log.d("vbvb", msg);
+                    lBuySaleBuilder.append(msg);
+                    if (lI==mPointValues_Y_DIF.size()-1){
+                        double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                        shouYiRateSum += curShouYiRate;
+                        SendMailUtil.send("641380205@qq.com","火-持有-DIF-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
+                    }
+                }
+            }else if(wr14 <= 20){//dif斜率向上买入
+                if (curStatus == STATUS_HOLD){
+                    double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
+                    shouYiRateSum += curShouYiRate;
+                    curStatus = STATUS_NULL;
+                    String msg = (mDate.get(lI))+" ,macd:"+String.format("%.8f",curdif)+" < 0 ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.8f",curShouYiRate*100)+" %========>卖出\n";
+                    Log.d("vbvb", msg);
+                    lBuySaleBuilder.append(msg);
+                    if (lI==mPointValues_Y_MACD.size()-1){
+                        SendMailUtil.send("641380205@qq.com","火-卖-DIF-"+mSymbols[mCurSymbo]+"-总收："+String.format("%.2f",shouYiRateSum * 100)+"%"+"-当收："+String.format("%.6f",curShouYiRate)+"%",lBuySaleBuilder.toString());
+                    }
+                }
+            }else {//中间就继续持有
 
+            }
+        }
     }
 
     private void parseData() {

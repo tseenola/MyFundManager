@@ -50,17 +50,7 @@ public class DIFBgService extends Service {
             ,"adausdt"
             ,"dashusdt"
             ,"omgusdt"
-            ,"zecusdt"
-            ,"iotausdt"
-            ,"xmrusdt"
-            ,"hb10usdt"
-            ,"gxcusdt"
-            ,"hitusdt"
-            ,"btmusdt"
-            ,"paiusdt"
-            ,"hptusdt"
-            ,"elausdt"
-            ,"ontusdt"};
+            ,"zecusdt"};
     /*private String [] mSymbols = {
             "btcusdt"
             ,"ethusdt"
@@ -504,9 +494,7 @@ public class DIFBgService extends Service {
         int curStatus = STATUS_NULL;
         double shouYiRateSum = 0;//收益率
         double curHoldVal = 0d;//当前持有价格
-        double curHoldDIFAvg = 0d;//买入后DIF平均值
         int holdDay = 0;//持有天数
-        double curHoldDIFSum = 0d;
         StringBuilder lBuySaleBuilder = new StringBuilder("火：Symbol:"+mSymbols[mCurSymbo]+",Period:"+mPeriod+",Size:"+mSize+",实际数据数量："+mPointValues_Y_MACD.size());
         for (int lI = 0; lI < mPointValues_Y_DIF.size(); lI++) {
             if (lI<10){
@@ -520,10 +508,8 @@ public class DIFBgService extends Service {
                 if (curStatus == STATUS_NULL) {//斜率向上没有买入-第一次买入
                     curStatus = STATUS_HOLD;
                     curHoldVal = closeVal;
-                    curHoldDIFAvg = curdif;
                     holdDay = 1;
-                    curHoldDIFSum = curdif;
-                    String msg = "\n\n"+mDate.get(lI)+" ,curdif:"+String.format("%.8f",curdif)+" >0, curdif avg:" +String.format("%.8f",curHoldDIFAvg)+ ",天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ====================>买入\n";
+                    String msg = "\n\n"+mDate.get(lI)+" ,curdif:"+String.format("%.8f",curdif)+" predif:" +String.format("%.8f",predif)+ ",天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ====================>买入\n";
                     lBuySaleBuilder.append(msg);
                     Log.d("vbvb", msg);
                     //如果买入信号是最后进一条数据那么说明是今天，就发送邮件通知
@@ -532,12 +518,10 @@ public class DIFBgService extends Service {
                     }
                 }else if (curStatus == STATUS_HOLD){//斜率向上，已经买入继续持有
                     holdDay ++;
-                    curHoldDIFSum += curdif;
-                    curHoldDIFAvg = curHoldDIFSum/holdDay;
-                    if (curdif>=curHoldDIFAvg){
+                    if (curdif>=predif){
                         //继续持有
                         //如果当前
-                        String msg = mDate.get(lI)+" ,curdif:"+String.format("%.8f",curdif)+" >= curdif avg:"+String.format("%.8f",curHoldDIFAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ==>继续持有\n";
+                        String msg = mDate.get(lI)+" ,curdif:"+String.format("%.8f",curdif)+" >= predif:"+String.format("%.8f",predif)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ==>继续持有\n";
                         Log.d("vbvb", msg);
                         lBuySaleBuilder.append(msg);
                         if (lI==mPointValues_Y_DIF.size()-1){
@@ -551,7 +535,7 @@ public class DIFBgService extends Service {
                             double curShouYiRate = (closeVal - curHoldVal) / curHoldVal;
                             shouYiRateSum += curShouYiRate;
                             curStatus = STATUS_NULL;
-                            String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",curdif)+" < macd avg:"+String.format("%.8f",curHoldDIFAvg)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.2f",curShouYiRate*100)+" %========>卖出\n";
+                            String msg = mDate.get(lI)+" ,macd:"+String.format("%.8f",curdif)+" < predif :"+String.format("%.8f",predif)+" ,天数："+holdDay+ " ,closeVal:"+String.format("%.8f",closeVal)+" ,收益率："+String.format("%.2f",curShouYiRate*100)+" %========>卖出\n";
                             Log.d("vbvb", msg);
                             lBuySaleBuilder.append(msg);
                             if (lI==mPointValues_Y_DIF.size()-1){
